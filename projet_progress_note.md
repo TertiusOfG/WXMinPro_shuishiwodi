@@ -198,3 +198,84 @@
 
    * 在游戏页面添加轮流发言的提示和投票按钮。
    * 在后端添加处理投票、判断玩家出局、以及判断最终胜负的逻辑。
+  
+根据笔记，下一步是：
+   1. 在游戏页面(pages/game)添加轮流发言的提示和投票按钮。
+   2. 在后端(server/app.js)添加处理投票、判断玩家出局、以及判断最终胜负的逻辑。
+
+我已经看过了 server/app.js
+  的代码。现在我将为其添加处理发言、投票和游戏结束的逻辑。
+
+
+  这包括以下几个步骤：
+   1. 在 rooms 对象中为每个房间增加一个 turn 字段来追踪轮到谁发言，以及一个 votes
+      字段来记录投票。
+   2. 创建一个新的 player_action case in the switch statement to handle player
+      actions like voting.
+   3. 在 start_game 之后，广播一个 turn_update 消息，告诉客户端轮到谁发言。
+   4. 在收到所有玩家的投票后，计算票数，淘汰得票最多的玩家，并检查游戏是否结束。
+   5. 如果游戏结束，广播 game_over 消息，并公布结果。
+
+我还需要添加 broadcastTurnUpdate 和 broadcastGameOver 这两个辅助函数。
+
+后端逻辑已经更新完毕。现在，我将更新前端 game 页面，添加发言和投票的界面。
+我已经了解了 game.js 和 game.wxml
+  的内容。现在我将修改它们，以实现发言提示、投票和显示玩家状态的功能。
+
+  对于 `game.wxml`，我将做以下修改：
+
+
+   1. 在 game-status 部分，添加一个 text 来显示当前轮到谁发言。
+   2. 在 players-grid
+      部分，为每个玩家卡片添加一个状态指示器，以显示他们是否被淘汰。
+   3. 在 action-area 部分，将投票按钮改为一个
+      button，并根据游戏状态来启用或禁用它。当投票阶段开始时，将显示一个投票列表。
+
+  对于 `game.js`，我将做以下修改：
+
+
+   1. 在 data 中添加 currentPlayerId 和 isMyTurn 字段，用于控制发言提示。
+   2. 在 onLoad 中，添加对 turn_update 和 game_over 消息的处理。
+   3. 添加一个 vote 函数，用于在玩家点击投票按钮时向服务器发送投票信息。
+   4. 添加一个 handleVote 函数，用于处理投票按钮的点击事件。
+
+在，核心的发言和投票功能的前后端代码都已经完成。不过，在 game.js
+  的代码中，我做了一个假设，即玩家的 ID 存储在 app.globalData.userInfo.id
+  中。我需要检查一下 app.js 和 index.js，确保玩家信息在适当时机被正确存储。
+
+  我已经阅读了 app.js 和 index.js。
+
+
+  问题很明确：
+   1. app.js 的 globalData 中有 playerId，但它从未被赋值。
+   2. index.js 在加入或创建房间时，只存储了 nickname 和 roomId，没有存储后端返回的
+      playerId。
+   3. game.js 中引用的 app.globalData.userInfo.id 根本不存在。
+
+
+  为了修复这个问题，我需要：
+   1. 修改 server/app.js，在玩家连接时，将生成的 playerId 发送给客户端。
+   2. 修改 client/app.js，在 globalData 中添加 userInfo 对象。
+   3. 修改 client/pages/index/index.js，在 onLoad 的 socket.onMessage
+      回调中，增加一个 connected 或类似的 case，用来接收并存储后端发来的
+      playerId。
+   4. 修改 client/pages/game/game.js，确保它从 app.globalData.userInfo.id
+      正确获取玩家 ID。
+
+我们来完成最后的结果页面。
+
+
+  这个页面需要做两件事：
+   1. 从 game 页面传递过来的 URL
+      参数中获取游戏结果（胜利方、卧底身份、卧底词语）。
+   2. 将这些信息清晰地展示给玩家。
+
+我们来实现发言功能。
+
+
+  这将分两步进行：
+   1. 后端 (`server/app.js`): 添加逻辑来处理玩家发言。服务器需要验证是否轮到该玩家
+      ，然后将发言内容广播给房间内的所有其他玩家，并管理发言和投票阶段的转换。
+   2. 前端 (`client/pages/game/`): 更新游戏页面，增加一个文本输入框和“发言”按钮，
+      并添加一个区域来显示所有人的发言记录。
+
