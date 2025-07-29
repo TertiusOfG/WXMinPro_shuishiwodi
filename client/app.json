@@ -1,0 +1,17 @@
+
+{
+  "pages":[
+    "pages/index/index",
+    "pages/room/room",
+    "pages/game/game",
+    "pages/result/result"
+  ],
+  "window":{
+    "backgroundTextStyle":"light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "谁是卧底",
+    "navigationBarTextStyle":"black"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

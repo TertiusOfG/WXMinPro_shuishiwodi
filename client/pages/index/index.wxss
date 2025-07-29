@@ -1,0 +1,45 @@
+
+/* pages/index/index.wxss */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx;
+}
+
+.title {
+  font-size: 60rpx;
+  font-weight: bold;
+  margin-bottom: 80rpx;
+}
+
+.input {
+  width: 80%;
+  height: 80rpx;
+  border: 1px solid #ccc;
+  border-radius: 10rpx;
+  padding: 0 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.button {
+  width: 80%;
+  margin-bottom: 20rpx;
+}
+
+.join-section {
+  display: flex;
+  width: 80%;
+  margin-top: 40rpx;
+}
+
+.room-input {
+  flex-grow: 1;
+  margin-right: 20rpx;
+  margin-bottom: 0;
+}
+
+.join-button {
+  width: auto;
+  flex-shrink: 0;
+}

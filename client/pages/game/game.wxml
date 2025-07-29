@@ -1,0 +1,25 @@
+
+<!--pages/game/game.wxml-->
+<view class="container">
+  <view class="word-display-area">
+    <view class="word-label">你的词语</view>
+    <view class="word">{{word}}</view>
+  </view>
+
+  <view class="game-status">
+    <text>游戏进行中...</text>
+    <!-- We will add more status info here, like whose turn it is -->
+  </view>
+
+  <view class="players-grid">
+    <view wx:for="{{players}}" wx:key="id" class="player-card">
+      <view class="player-nickname">{{item.nickname}}</view>
+      <!-- We can add status indicators here, e.g., 'speaking', 'voted out' -->
+    </view>
+  </view>
+
+  <view class="action-area">
+    <!-- Action buttons like voting will go here -->
+    <button class="button" disabled="{{true}}">投票</button>
+  </view>
+</view>

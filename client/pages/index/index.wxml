@@ -1,0 +1,11 @@
+
+<!--pages/index/index.wxml-->
+<view class="container">
+  <view class="title">谁是卧底</view>
+  <input class="input" placeholder="请输入你的昵称" bindinput="onNicknameInput" />
+  <button class="button" type="primary" bindtap="createRoom">创建房间</button>
+  <view class="join-section">
+    <input class="input room-input" placeholder="输入房间号" bindinput="onRoomIdInput" />
+    <button class="button join-button" bindtap="joinRoom">加入房间</button>
+  </view>
+</view>

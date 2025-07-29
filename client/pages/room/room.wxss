@@ -1,0 +1,46 @@
+
+/* pages/room/room.wxss */
+.container {
+  padding: 40rpx;
+}
+
+.room-info {
+  font-size: 40rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.players-list {
+  width: 100%;
+  margin-bottom: 60rpx;
+}
+
+.list-title {
+  font-size: 32rpx;
+  color: #888;
+  margin-bottom: 20rpx;
+}
+
+.player-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx;
+  background-color: #f0f0f0;
+  border-radius: 10rpx;
+  margin-bottom: 15rpx;
+}
+
+.player-item.ready {
+  background-color: #d4edda; /* A green-ish color */
+  color: #155724;
+}
+
+.button {
+  width: 100%;
+  margin-top: 20rpx;
+}
+
+.start-button {
+  background-color: #007bff;
+}

@@ -1,0 +1,14 @@
+
+<!--pages/room/room.wxml-->
+<view class="container">
+  <view class="room-info">房间号: {{roomId}}</view>
+  <view class="players-list">
+    <view class="list-title">玩家列表</view>
+    <view wx:for="{{players}}" wx:key="id" class="player-item {{item.isReady ? 'ready' : ''}}">
+      <text>{{item.nickname}}</text>
+      <text>{{item.isReady ? '已准备' : '未准备'}}</text>
+    </view>
+  </view>
+  <button class="button" bindtap="toggleReady">{{isReady ? '取消准备' : '准备'}}</button>
+  <button class="button start-button" type="primary" bindtap="startGame" wx:if="{{true}}">开始游戏</button> <!-- Simplified for now -->
+</view>

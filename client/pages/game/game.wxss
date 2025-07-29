@@ -1,0 +1,66 @@
+
+/* pages/game/game.wxss */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+}
+
+.word-display-area {
+  width: 90%;
+  padding: 40rpx;
+  margin-bottom: 40rpx;
+  background-color: #f8f9fa;
+  border-radius: 15rpx;
+  text-align: center;
+}
+
+.word-label {
+  font-size: 28rpx;
+  color: #6c757d;
+}
+
+.word {
+  font-size: 60rpx;
+  font-weight: bold;
+  color: #343a40;
+}
+
+.game-status {
+  margin-bottom: 40rpx;
+  font-size: 32rpx;
+  color: #007bff;
+}
+
+.players-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 40rpx;
+}
+
+.player-card {
+  width: 150rpx;
+  height: 150rpx;
+  margin: 15rpx;
+  background-color: #e9ecef;
+  border-radius: 10rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.player-nickname {
+  font-size: 28rpx;
+}
+
+.action-area {
+  width: 90%;
+}
+
+.button {
+  width: 100%;
+}
