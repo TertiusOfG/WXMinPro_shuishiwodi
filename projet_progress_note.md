@@ -1,3 +1,6 @@
+运行环境：
+node 18
+
 谁是卧底 微信小程序 开发进度笔记 记录
 
 目录结构中已经包含了 client 和 server 文件夹，我将沿用这个结构，将小程序作为 client，Node.js 应用作为 server。
