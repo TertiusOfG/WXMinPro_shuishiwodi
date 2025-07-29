@@ -20,6 +20,7 @@ Page({
 
       if (data.type === 'room_update') {
         this.setData({ players: data.payload.players });
+        app.globalData.room = data.payload; // Store the whole room state
       } else if (data.type === 'game_started') {
         wx.navigateTo({ url: `/pages/game/game?word=${data.payload.word}` });
       } else if (data.type === 'error') {

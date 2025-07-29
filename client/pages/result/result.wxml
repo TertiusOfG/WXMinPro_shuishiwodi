@@ -1,7 +1,7 @@
 
 <!--pages/result/result.wxml-->
 <view class="container">
-  <view class="result-title">{{resultText}}</view>
-  <view class="undercover-info">卧底是: {{undercoverNickname}}</view>
+  <view class="result-title">{{winnerText}}</view>
+  <view class="undercover-info">{{undercoverInfo}}</view>
   <button class="button" bindtap="goHome">返回首页</button>
 </view>

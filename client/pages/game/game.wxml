@@ -6,20 +6,35 @@
     <view class="word">{{word}}</view>
   </view>
 
+  <scroll-view class="speeches-area" scroll-y="true">
+    <view wx:for="{{speeches}}" wx:key="index" class="speech-bubble">
+      <text class="speech-nickname">{{item.nickname}}:</text>
+      <text class="speech-message">{{item.message}}</text>
+    </view>
+  </scroll-view>
+
   <view class="game-status">
-    <text>游戏进行中...</text>
-    <!-- We will add more status info here, like whose turn it is -->
+    <text wx:if="{{gameState === 'playing' && currentPlayerId}}">轮到 {{players.find(p => p.id === currentPlayerId).nickname}} 发言</text>
+    <text wx:if="{{gameState === 'voting'}}">请投票</text>
   </view>
 
-  <view class="players-grid">
-    <view wx:for="{{players}}" wx:key="id" class="player-card">
+  <view class="players-grid {{gameState === 'voting' ? 'voting-active' : ''}}">
+    <view wx:for="{{players}}" wx:key="id" class="player-card {{item.isEliminated ? 'eliminated' : ''}} {{item.id === selectedPlayerId ? 'selected' : ''}}" bindtap="handleVote" data-target-id="{{item.id}}">
       <view class="player-nickname">{{item.nickname}}</view>
-      <!-- We can add status indicators here, e.g., 'speaking', 'voted out' -->
+      <view class="player-status" wx:if="{{item.isEliminated}}">已出局</view>
     </view>
   </view>
 
   <view class="action-area">
-    <!-- Action buttons like voting will go here -->
-    <button class="button" disabled="{{true}}">投票</button>
+    <!-- Speech Input -->
+    <block wx:if="{{gameState === 'playing' && isMyTurn}}">
+      <input class="speech-input" placeholder="请输入你的描述" value="{{speechInput}}" bindinput="onSpeechInput" />
+      <button class="button" bindtap="submitSpeech">发言</button>
+    </block>
+
+    <!-- Voting Button -->
+    <block wx:if="{{gameState === 'voting'}}">
+      <button class="button" bindtap="submitVote" disabled="{{!selectedPlayerId}}">确认投票</button>
+    </block>
   </view>
 </view>

@@ -23,7 +23,9 @@ Page({
       const data = JSON.parse(res.data);
       console.log('Received from server:', data);
 
-      if (data.type === 'room_created') {
+      if (data.type === 'connected') {
+        app.globalData.userInfo = { id: data.payload.id };
+      } else if (data.type === 'room_created') {
         app.globalData.roomId = data.payload.roomId;
         wx.navigateTo({ url: `/pages/room/room?roomId=${data.payload.roomId}` });
       } else if (data.type === 'room_update') {
@@ -58,7 +60,7 @@ Page({
       wx.showToast({ title: '请输入昵称', icon: 'none' });
       return;
     }
-    app.globalData.nickname = this.data.nickname;
+    app.globalData.userInfo.nickname = this.data.nickname;
     const msg = {
       type: 'create_room',
       payload: { nickname: this.data.nickname }
@@ -71,8 +73,8 @@ Page({
       wx.showToast({ title: '请输入昵称和房间号', icon: 'none' });
       return;
     }
-    app.globalData.nickname = this.data.nickname;
-    app.globalDara.roomId = this.data.roomId;
+    app.globalData.userInfo.nickname = this.data.nickname;
+    app.globalData.roomId = this.data.roomId;
     const msg = {
       type: 'join_room',
       payload: { nickname: this.data.nickname, roomId: this.data.roomId }
