@@ -279,3 +279,34 @@
    2. 前端 (`client/pages/game/`): 更新游戏页面，增加一个文本输入框和“发言”按钮，
       并添加一个区域来显示所有人的发言记录。
 
+现在我将为其添加处理发言的逻辑。
+
+
+  这包括以下几个步骤：
+   1. 在 rooms 对象中为每个房间增加一个 speeches 数组来存储发言记录。
+   2. 在 player_action case 中，增加一个 speak action。
+   3. 当玩家发言时，服务器会验证是否轮到该玩家，然后将发言内容广播给房间内的所有玩
+      家。
+   4. 在所有玩家都发言完毕后，服务器将游戏状态切换为 voting。
+
+现在，我将更新前端 game
+  页面，添加发言输入框、发言记录显示区域，并处理 new_speech 消息。
+
+现在我将修改它们，以实现发言功能。
+
+
+  对于 `game.wxml`，我将做以下修改：
+
+
+   1. 添加一个 scroll-view 来显示发言记录。
+   2. 在 action-area 部分，根据 isMyTurn 和 gameState
+      来显示发言输入框和按钮，或者投票按钮。
+
+
+  对于 `game.js`，我将做以下修改：
+
+
+   1. 在 data 中添加 speeches 数组和 speechInput 字符串。
+   2. 在 onLoad 的 onMessage 回调中，增加对 new_speech 消息的处理。
+   3. 添加 onSpeechInput 函数来更新 speechInput。
+   4. 添加 submitSpeech 函数来向服务器发送发言。
