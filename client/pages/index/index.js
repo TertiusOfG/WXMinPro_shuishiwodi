@@ -24,7 +24,7 @@ Page({
       console.log('Received from server:', data);
 
       if (data.type === 'connected') {
-        app.globalData.userInfo = { id: data.payload.id };
+        app.globalData.userInfo.id = data.payload.id;
       } else if (data.type === 'room_created') {
         app.globalData.roomId = data.payload.roomId;
         wx.navigateTo({ url: `/pages/room/room?roomId=${data.payload.roomId}` });

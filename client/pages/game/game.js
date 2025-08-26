@@ -17,8 +17,8 @@ Page({
   onLoad(options) {
     this.setData({ 
       word: options.word,
-      players: app.globalData.room.players
     });
+    this.updatePlayers(app.globalData.room.players);
     this.updateCurrentPlayerNickname(); // 初始化时也更新一次
 
     app.globalData.socket.onMessage((res) => {
@@ -27,8 +27,8 @@ Page({
 
       switch (data.type) {
         case 'room_update':
+          this.updatePlayers(data.payload.players);
           this.setData({
-            players: data.payload.players,
             gameState: data.payload.gameState
           }, () => {
             this.updateCurrentPlayerNickname(); // 数据更新后重新计算
@@ -55,6 +55,32 @@ Page({
           });
           break;
       }
+    });
+  },
+
+  updatePlayers(players) {
+    const styledPlayers = this.calculatePlayerPositions(players);
+    this.setData({ players: styledPlayers });
+  },
+
+  calculatePlayerPositions(players) {
+    const numPlayers = players.length;
+    if (numPlayers === 0) return [];
+
+    const radius = 140; // rpx
+    const containerSize = 360; // rpx, should match the .players-grid size
+    const cardSize = 150; // rpx, should match the .player-card size
+
+    return players.map((player, index) => {
+      // Angle in radians
+      const angle = (index / numPlayers) * 2 * Math.PI - (Math.PI / 2); // Start from top
+      
+      // Calculate position
+      const x = (containerSize / 2) + radius * Math.cos(angle) - (cardSize / 2);
+      const y = (containerSize / 2) + radius * Math.sin(angle) - (cardSize / 2);
+      
+      player.style = `top: ${y}rpx; left: ${x}rpx;`;
+      return player;
     });
   },
 

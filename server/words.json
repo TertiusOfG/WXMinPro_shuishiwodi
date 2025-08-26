@@ -1,13 +1,42 @@
-
 [
-  { "civilian": "牛奶", "undercover": "豆浆" },
-  { "civilian": "牙刷", "undercover": "梳子" },
-  { "civilian": "可乐", "undercover": "雪碧" },
-  { "civilian": "夏天", "undercover": "秋天" },
-  { "civilian": "手机", "undercover": "充电宝" },
-  { "civilian": "饺子", "undercover": "馄饨" },
-  { "civilian": "键盘", "undercover": "鼠标" },
-  { "civilian": "篮球", "undercover": "足球" },
-  { "civilian": "太阳", "undercover": "月亮" },
-  { "civilian": "老师", "undercover": "学生" }
+  {
+    "civilian": "牛奶",
+    "undercover": "豆浆"
+  },
+  {
+    "civilian": "牙刷",
+    "undercover": "梳子"
+  },
+  {
+    "civilian": "可乐",
+    "undercover": "雪碧"
+  },
+  {
+    "civilian": "夏天",
+    "undercover": "秋天"
+  },
+  {
+    "civilian": "手机",
+    "undercover": "充电宝"
+  },
+  {
+    "civilian": "饺子",
+    "undercover": "馄饨"
+  },
+  {
+    "civilian": "键盘",
+    "undercover": "鼠标"
+  },
+  {
+    "civilian": "篮球",
+    "undercover": "足球"
+  },
+  {
+    "civilian": "太阳",
+    "undercover": "月亮"
+  },
+  {
+    "civilian": "老师",
+    "undercover": "学生"
+  }
 ]

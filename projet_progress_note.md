@@ -312,4 +312,4 @@ node 18
    1. 在 data 中添加 speeches 数组和 speechInput 字符串。
    2. 在 onLoad 的 onMessage 回调中，增加对 new_speech 消息的处理。
    3. 添加 onSpeechInput 函数来更新 speechInput。
-   4. 添加 submitSpeech 函数来向服务器发送发言。123
+   4. 添加 submitSpeech 函数来向服务器发送发言。

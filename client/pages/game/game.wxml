@@ -19,7 +19,7 @@
   </view>
 
   <view class="players-grid {{gameState === 'voting' ? 'voting-active' : ''}}">
-    <view wx:for="{{players}}" wx:key="id" class="player-card {{item.isEliminated ? 'eliminated' : ''}} {{item.id === selectedPlayerId ? 'selected' : ''}}" bindtap="handleVote" data-target-id="{{item.id}}">
+    <view wx:for="{{players}}" wx:key="id" class="player-card {{item.isEliminated ? 'eliminated' : ''}} {{item.id === selectedPlayerId ? 'selected' : ''}} {{item.id === currentPlayerId ? 'current-turn' : ''}}" bindtap="handleVote" data-target-id="{{item.id}}" style="{{item.style}}">
       <view class="player-nickname">{{item.nickname}}</view>
       <view class="player-status" wx:if="{{item.isEliminated}}">已出局</view>
     </view>

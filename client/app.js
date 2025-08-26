@@ -5,8 +5,9 @@ App({
     // Do something when launch.
   },
   globalData: {
-    userInfo: null, // Will store { id, nickname }
+    userInfo: {}, // Will store { id, nickname }
     socket: null,
-    roomId: null
+    roomId: null,
+    room: null
   }
 })
