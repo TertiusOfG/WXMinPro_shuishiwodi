@@ -14,7 +14,7 @@
   </scroll-view>
 
   <view class="game-status">
-    <text wx:if="{{gameState === 'playing' && currentPlayerId}}">轮到 {{players.find(p => p.id === currentPlayerId).nickname}} 发言</text>
+    <text wx:if="{{gameState === 'playing' && currentPlayerId}}">轮到 {{currentPlayerNickname}} 发言</text>
     <text wx:if="{{gameState === 'voting'}}">请投票</text>
   </view>
 
