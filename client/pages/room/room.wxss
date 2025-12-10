@@ -2,13 +2,20 @@
 /* pages/room/room.wxss */
 .container {
   padding: 40rpx;
+  min-height: 100vh;
+  background-color: #FAFAFA;
 }
 
 .room-info {
-  font-size: 40rpx;
+  font-size: 44rpx;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 40rpx;
+  margin-bottom: 60rpx;
+  color: #F9A825; /* Warm Gold */
+  padding: 30rpx;
+  background-color: white;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
 }
 
 .players-list {
@@ -17,23 +24,32 @@
 }
 
 .list-title {
-  font-size: 32rpx;
-  color: #888;
-  margin-bottom: 20rpx;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 24rpx;
+  font-weight: 500;
+  letter-spacing: 1rpx;
 }
 
 .player-item {
   display: flex;
   justify-content: space-between;
-  padding: 20rpx;
-  background-color: #f0f0f0;
-  border-radius: 10rpx;
-  margin-bottom: 15rpx;
+  align-items: center;
+  padding: 28rpx 32rpx;
+  background-color: white;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  border: 2rpx solid transparent;
+  transition: all 0.3s ease;
 }
 
 .player-item.ready {
-  background-color: #d4edda; /* A green-ish color */
-  color: #155724;
+  background: linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%); /* Peaceful Blue gradient */
+  border-color: #4FC3F7;
+  box-shadow: 0 4rpx 16rpx rgba(79, 195, 247, 0.3);
+  color: #01579B;
+  font-weight: 500;
 }
 
 .button {
@@ -42,5 +58,6 @@
 }
 
 .start-button {
-  background-color: #007bff;
+  background-color: #F9A825; /* Warm Gold */
+  color: white;
 }

@@ -1,11 +1,11 @@
-
 // pages/index/index.js
 const app = getApp();
 
 Page({
   data: {
     nickname: '',
-    roomId: ''
+    roomId: '',
+    isSpectator: false
   },
 
   onLoad() {
@@ -55,6 +55,12 @@ Page({
     this.setData({ roomId: e.detail.value });
   },
 
+  onSpectatorChange(e) {
+    this.setData({
+      isSpectator: e.detail.value.includes('true')
+    });
+  },
+
   createRoom() {
     if (!this.data.nickname) {
       wx.showToast({ title: '请输入昵称', icon: 'none' });
@@ -77,7 +83,11 @@ Page({
     app.globalData.roomId = this.data.roomId;
     const msg = {
       type: 'join_room',
-      payload: { nickname: this.data.nickname, roomId: this.data.roomId }
+      payload: { 
+        nickname: this.data.nickname, 
+        roomId: this.data.roomId,
+        isSpectator: this.data.isSpectator
+      }
     };
     app.globalData.socket.send({ data: JSON.stringify(msg) });
   }

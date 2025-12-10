@@ -1,4 +1,3 @@
-
 // pages/room/room.js
 const app = getApp();
 
@@ -6,26 +5,43 @@ Page({
   data: {
     roomId: '',
     players: [],
-    isReady: false
+    spectators: [],
+    isReady: false,
+    isSpectator: false
   },
 
   onLoad(options) {
     this.setData({ roomId: options.roomId });
     app.globalData.roomId = options.roomId;
 
-    // Listen for messages
+    if (app.globalData.room) {
+        this.updateRoomData(app.globalData.room);
+    }
+
     app.globalData.socket.onMessage((res) => {
       const data = JSON.parse(res.data);
       console.log('Room received:', data);
 
       if (data.type === 'room_update') {
-        this.setData({ players: data.payload.players });
-        app.globalData.room = data.payload; // Store the whole room state
+        this.updateRoomData(data.payload);
+        app.globalData.room = data.payload;
       } else if (data.type === 'game_started') {
-        wx.navigateTo({ url: `/pages/game/game?word=${data.payload.word}` });
+        const word = this.data.isSpectator ? '' : data.payload.word;
+        wx.navigateTo({ url: `/pages/game/game?word=${word}&isSpectator=${this.data.isSpectator}` });
       } else if (data.type === 'error') {
         wx.showToast({ title: data.payload.message, icon: 'none' });
       }
+    });
+  },
+
+  updateRoomData(roomData) {
+    const allUsers = roomData.players || [];
+    const currentUser = allUsers.find(p => p.id === app.globalData.userInfo.id);
+
+    this.setData({ 
+      players: allUsers.filter(p => !p.isSpectator),
+      spectators: allUsers.filter(p => p.isSpectator),
+      isSpectator: currentUser ? currentUser.isSpectator : false
     });
   },
 
@@ -46,7 +62,5 @@ Page({
   },
 
   onUnload() {
-    // Optional: Handle user leaving the room page
-    // The server's ws.on('close') will handle disconnection
   }
 });

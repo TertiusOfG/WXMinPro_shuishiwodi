@@ -1,15 +1,19 @@
-
 <!--pages/game/game.wxml-->
 <view class="container">
-  <view class="word-display-area">
+  <view class="word-display-area" wx:if="{{!isSpectator}}">
     <view class="word-label">你的词语</view>
     <view class="word">{{word}}</view>
   </view>
+  <view class="word-display-area" wx:if="{{isSpectator}}">
+    <view class="word-label">观战模式</view>
+  </view>
 
-  <scroll-view class="speeches-area" scroll-y="true">
-    <view wx:for="{{speeches}}" wx:key="index" class="speech-bubble">
-      <text class="speech-nickname">{{item.nickname}}:</text>
-      <text class="speech-message">{{item.message}}</text>
+  <scroll-view class="speeches-area" scroll-y="true" scroll-top="{{scrollTop}}">
+    <view wx:for="{{speeches}}" wx:key="index" class="speech-row {{item.playerId === myId ? 'my-speech-row' : 'other-speech-row'}}">
+      <view class="speech-bubble {{item.playerId === myId ? 'my-speech-bubble' : 'other-speech-bubble'}}">
+        <text class="speech-nickname">{{item.nickname}}</text>
+        <text class="speech-message">{{item.message}}</text>
+      </view>
     </view>
   </scroll-view>
 
@@ -18,14 +22,14 @@
     <text wx:if="{{gameState === 'voting'}}">请投票</text>
   </view>
 
-  <view class="players-grid {{gameState === 'voting' ? 'voting-active' : ''}}">
-    <view wx:for="{{players}}" wx:key="id" class="player-card {{item.isEliminated ? 'eliminated' : ''}} {{item.id === selectedPlayerId ? 'selected' : ''}} {{item.id === currentPlayerId ? 'current-turn' : ''}}" bindtap="handleVote" data-target-id="{{item.id}}" style="{{item.style}}">
+  <view class="players-grid {{gameState === 'voting' && !isSpectator ? 'voting-active' : ''}}">
+    <view wx:for="{{players}}" wx:key="id" class="player-card {{item.isEliminated ? 'eliminated' : ''}} {{item.id === selectedPlayerId ? 'selected' : ''}} {{item.id === currentPlayerId ? 'current-turn' : ''}}" bindtap="{{!isSpectator ? 'handleVote' : ''}}" data-target-id="{{item.id}}" style="{{item.style}}">
       <view class="player-nickname">{{item.nickname}}</view>
       <view class="player-status" wx:if="{{item.isEliminated}}">已出局</view>
     </view>
   </view>
 
-  <view class="action-area">
+  <view class="action-area" wx:if="{{!isSpectator}}">
     <!-- Speech Input -->
     <block wx:if="{{gameState === 'playing' && isMyTurn}}">
       <input class="speech-input" placeholder="请输入你的描述" value="{{speechInput}}" bindinput="onSpeechInput" />

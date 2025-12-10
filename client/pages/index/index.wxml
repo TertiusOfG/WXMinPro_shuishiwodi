@@ -6,6 +6,11 @@
   <button class="button" type="primary" bindtap="createRoom">创建房间</button>
   <view class="join-section">
     <input class="input room-input" placeholder="输入房间号" bindinput="onRoomIdInput" />
+    <checkbox-group bindchange="onSpectatorChange">
+      <label class="checkbox-label">
+        <checkbox value="true"/>以观众身份加入
+      </label>
+    </checkbox-group>
     <button class="button join-button" bindtap="joinRoom">加入房间</button>
   </view>
 </view>

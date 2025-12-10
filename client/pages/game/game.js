@@ -7,19 +7,24 @@ Page({
     players: [],
     gameState: 'playing', // playing, voting, finished
     currentPlayerId: null,
-    currentPlayerNickname: '', // 新增：存储当前玩家昵称
+    currentPlayerNickname: '',
     selectedPlayerId: null,
     isMyTurn: false,
     speeches: [],
-    speechInput: ''
+    speechInput: '',
+    myId: '',
+    scrollTop: 0,
+    isSpectator: false
   },
 
   onLoad(options) {
     this.setData({ 
       word: options.word,
+      myId: app.globalData.userInfo.id,
+      isSpectator: options.isSpectator === 'true'
     });
     this.updatePlayers(app.globalData.room.players);
-    this.updateCurrentPlayerNickname(); // 初始化时也更新一次
+    this.updateCurrentPlayerNickname();
 
     app.globalData.socket.onMessage((res) => {
       const data = JSON.parse(res.data);
@@ -31,7 +36,7 @@ Page({
           this.setData({
             gameState: data.payload.gameState
           }, () => {
-            this.updateCurrentPlayerNickname(); // 数据更新后重新计算
+            this.updateCurrentPlayerNickname();
           });
           break;
         case 'turn_update':
@@ -41,12 +46,14 @@ Page({
             isMyTurn: data.payload.currentPlayerId === myPlayerId,
             gameState: 'playing'
           }, () => {
-            this.updateCurrentPlayerNickname(); // 数据更新后重新计算
+            this.updateCurrentPlayerNickname();
           });
           break;
         case 'new_speech':
+          const newSpeeches = [...this.data.speeches, data.payload];
           this.setData({
-            speeches: [...this.data.speeches, data.payload]
+            speeches: newSpeeches,
+            scrollTop: newSpeeches.length * 1000 // A large number to scroll to bottom
           });
           break;
         case 'game_over':
@@ -68,23 +75,18 @@ Page({
     if (numPlayers === 0) return [];
 
     const radius = 140; // rpx
-    const containerSize = 360; // rpx, should match the .players-grid size
-    const cardSize = 150; // rpx, should match the .player-card size
+    const containerSize = 360; // rpx
+    const cardSize = 150; // rpx
 
     return players.map((player, index) => {
-      // Angle in radians
-      const angle = (index / numPlayers) * 2 * Math.PI - (Math.PI / 2); // Start from top
-      
-      // Calculate position
+      const angle = (index / numPlayers) * 2 * Math.PI - (Math.PI / 2);
       const x = (containerSize / 2) + radius * Math.cos(angle) - (cardSize / 2);
       const y = (containerSize / 2) + radius * Math.sin(angle) - (cardSize / 2);
-      
       player.style = `top: ${y}rpx; left: ${x}rpx;`;
       return player;
     });
   },
 
-  // 新增方法：更新当前玩家昵称
   updateCurrentPlayerNickname: function() {
     if (this.data.currentPlayerId && this.data.players.length > 0) {
       const currentPlayer = this.data.players.find(p => p.id === this.data.currentPlayerId);
@@ -126,15 +128,12 @@ Page({
   },
 
   handleVote(e) {
-    if (this.data.gameState !== 'voting') return;
-
+    if (this.data.isSpectator || this.data.gameState !== 'voting') return;
     const targetId = e.currentTarget.dataset.targetId;
     const player = this.data.players.find(p => p.id === targetId);
-
     if (targetId === app.globalData.userInfo.id || player.isEliminated) {
       return;
     }
-
     this.setData({
       selectedPlayerId: targetId
     });

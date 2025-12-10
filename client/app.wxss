@@ -1,5 +1,12 @@
 
 /**app.wxss**/
+
+/* Christian Theme Color Palette */
+page {
+  background-color: #FAFAFA; /* Soft Cream */
+  color: #333333;
+}
+
 .container {
   height: 100%;
   display: flex;
@@ -8,4 +15,29 @@
   justify-content: space-between;
   padding: 200rpx 0;
   box-sizing: border-box;
+}
+
+/* Global Button Styling */
+button {
+  border-radius: 50rpx; /* Pill shape */
+  font-size: 32rpx;
+  font-weight: 500;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+button[type="primary"] {
+  background-color: #F9A825; /* Warm Gold */
+  border: none;
+}
+
+button[type="default"] {
+  background-color: #4FC3F7; /* Heavenly Blue */
+  color: white;
+  border: none;
+}
+
+button:active {
+  opacity: 0.8;
+  transform: scale(0.98);
 }
