@@ -42,7 +42,7 @@
 }
 
 .join-section {
-  display: flex;
+  /* display: flex; */
   width: 80%;
   margin-top: 60rpx;
   align-items: center;
@@ -51,11 +51,17 @@
 .room-input {
   flex-grow: 1;
   margin-right: 20rpx;
-  margin-bottom: 0;
+  margin-bottom: 20rpx;
+}
+
+.checkbox-label {
+  display: flex;
+  margin-bottom: 20rpx;
 }
 
 .join-button {
   width: auto;
   flex-shrink: 0;
-  padding: 0 40rpx;
+  padding: 15rpx 40rpx;
+  margin-bottom: 20rpx;
 }

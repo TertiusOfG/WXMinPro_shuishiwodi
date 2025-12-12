@@ -10,59 +10,118 @@ Page({
     currentPlayerNickname: '',
     selectedPlayerId: null,
     isMyTurn: false,
+    hasVoted: false,
     speeches: [],
     speechInput: '',
     myId: '',
     scrollTop: 0,
-    isSpectator: false
+    toView: '',
+    isSpectator: false,
+    // new fields
+    isCreator: false,
+    creatorId: null,
+    voteProgress: ''
   },
 
   onLoad(options) {
-    this.setData({ 
+    this.setData({
       word: options.word,
       myId: app.globalData.userInfo.id,
-      isSpectator: options.isSpectator === 'true'
+      isSpectator: options.isSpectator === 'true',
+      myNickname: app.globalData.userInfo && app.globalData.userInfo.nickname ? app.globalData.userInfo.nickname : ''
     });
-    this.updatePlayers(app.globalData.room.players);
-    this.updateCurrentPlayerNickname();
 
-    app.globalData.socket.onMessage((res) => {
-      const data = JSON.parse(res.data);
-      console.log('Game page received:', data);
+    // initialize from global room if available
+    if (app.globalData.room) {
+      const room = app.globalData.room;
+      this.updatePlayers(room.players || []);
+      const payloadCurrent = room.currentPlayerId || null;
+      const myId = app.globalData.userInfo.id;
+      this.setData({
+        currentPlayerId: payloadCurrent,
+        isMyTurn: payloadCurrent === myId,
+        gameState: room.gameState || this.data.gameState,
+        creatorId: room.creatorId || null,
+        isCreator: (room.creatorId === myId)
+      }, () => {
+        this.updateCurrentPlayerNickname();
+      });
+    } else {
+      this.updatePlayers([]);
+      this.updateCurrentPlayerNickname();
+    }
 
-      switch (data.type) {
-        case 'room_update':
-          this.updatePlayers(data.payload.players);
-          this.setData({
-            gameState: data.payload.gameState
-          }, () => {
-            this.updateCurrentPlayerNickname();
-          });
-          break;
-        case 'turn_update':
-          const myPlayerId = app.globalData.userInfo.id;
-          this.setData({
-            currentPlayerId: data.payload.currentPlayerId,
-            isMyTurn: data.payload.currentPlayerId === myPlayerId,
-            gameState: 'playing'
-          }, () => {
-            this.updateCurrentPlayerNickname();
-          });
-          break;
-        case 'new_speech':
-          const newSpeeches = [...this.data.speeches, data.payload];
-          this.setData({
-            speeches: newSpeeches,
-            scrollTop: newSpeeches.length * 1000 // A large number to scroll to bottom
-          });
-          break;
-        case 'game_over':
-          wx.redirectTo({
-            url: `../result/result?winner=${data.payload.winner}&undercover=${data.payload.undercoverNickname}&word=${data.payload.undercoverWord}`
-          });
-          break;
-      }
-    });
+    // register message handler
+    this._handlerKey = `game_${Math.random().toString(36).substring(2,8)}`;
+    if (app.globalData && app.globalData.registerMessageHandler) {
+      app.globalData.registerMessageHandler(this._handlerKey, (res) => {
+        const data = JSON.parse(res.data);
+        console.log('Game page received:', data);
+
+        switch (data.type) {
+          case 'room_closed':
+            wx.showToast({ title: data.payload && data.payload.message ? data.payload.message : '房间已关闭', icon: 'none' });
+            if (app.globalData) { app.globalData.room = null; app.globalData.roomId = null; }
+            if (this._handlerKey && app.globalData && app.globalData.unregisterMessageHandler) {
+              app.globalData.unregisterMessageHandler(this._handlerKey);
+            }
+            wx.reLaunch({ url: '/pages/index/index' });
+            break;
+
+          case 'room_update':
+            this.updatePlayers(data.payload.players || []);
+            const payloadCurrent = data.payload.currentPlayerId || null;
+            const myId = app.globalData.userInfo.id;
+            this.setData({
+              gameState: data.payload.gameState,
+              currentPlayerId: payloadCurrent,
+              isMyTurn: payloadCurrent === myId,
+              creatorId: data.payload.creatorId || null,
+              isCreator: (data.payload.creatorId === myId)
+            }, () => {
+              this.updateCurrentPlayerNickname();
+            });
+            break;
+
+          case 'turn_update':
+            const myPlayerId = app.globalData.userInfo.id;
+            this.setData({
+              currentPlayerId: data.payload.currentPlayerId,
+              isMyTurn: data.payload.currentPlayerId === myPlayerId,
+              gameState: 'playing'
+            }, () => this.updateCurrentPlayerNickname());
+            break;
+
+          case 'new_speech':
+            const newSpeeches = [...this.data.speeches, data.payload];
+            const newIndex = newSpeeches.length - 1;
+            this.setData({ speeches: newSpeeches, toView: `speech-${newIndex}` });
+            break;
+
+          case 'vote_update':
+            this.setData({ voteProgress: `${data.payload.votesReceived}/${data.payload.total}` });
+            break;
+
+          case 'vote_error':
+            wx.showToast({ title: data.payload.message || '投票错误', icon: 'none' });
+            break;
+
+          case 'game_over':
+            wx.redirectTo({ url: `../result/result?winner=${data.payload.winner}&undercover=${data.payload.undercoverNickname}&word=${data.payload.undercoverWord}` });
+            break;
+
+          case 'game_terminated':
+            wx.showToast({ title: data.payload && data.payload.message ? data.payload.message : '游戏已被终止', icon: 'none' });
+            // return to room view
+            if (app.globalData && app.globalData.roomId) {
+              wx.redirectTo({ url: `../room/room?roomId=${app.globalData.roomId}` });
+            } else {
+              wx.reLaunch({ url: '/pages/index/index' });
+            }
+            break;
+        }
+      });
+    }
   },
 
   updatePlayers(players) {
@@ -87,22 +146,12 @@ Page({
     });
   },
 
-  updateCurrentPlayerNickname: function() {
+  updateCurrentPlayerNickname() {
     if (this.data.currentPlayerId && this.data.players.length > 0) {
       const currentPlayer = this.data.players.find(p => p.id === this.data.currentPlayerId);
-      if (currentPlayer) {
-        this.setData({
-          currentPlayerNickname: currentPlayer.nickname
-        });
-      } else {
-        this.setData({
-          currentPlayerNickname: ''
-        });
-      }
+      this.setData({ currentPlayerNickname: currentPlayer ? currentPlayer.nickname : '' });
     } else {
-      this.setData({
-        currentPlayerNickname: ''
-      });
+      this.setData({ currentPlayerNickname: '' });
     }
   },
 
@@ -111,19 +160,8 @@ Page({
   },
 
   submitSpeech() {
-    if (!this.data.speechInput.trim()) {
-      wx.showToast({ title: '发言不能为空', icon: 'none' });
-      return;
-    }
-    app.globalData.socket.send({
-      data: JSON.stringify({
-        type: 'player_action',
-        payload: {
-          action: 'speak',
-          message: this.data.speechInput
-        }
-      })
-    });
+    if (!this.data.speechInput.trim()) { wx.showToast({ title: '发言不能为空', icon: 'none' }); return; }
+    app.globalData.socket.send({ data: JSON.stringify({ type: 'player_action', payload: { action: 'speak', message: this.data.speechInput } }) });
     this.setData({ speechInput: '' });
   },
 
@@ -131,32 +169,53 @@ Page({
     if (this.data.isSpectator || this.data.gameState !== 'voting') return;
     const targetId = e.currentTarget.dataset.targetId;
     const player = this.data.players.find(p => p.id === targetId);
-    if (targetId === app.globalData.userInfo.id || player.isEliminated) {
+    if (!player) return;
+    if (targetId === app.globalData.userInfo.id || player.isEliminated) return;
+    if (player.isSpectator) {
+      wx.showToast({ title: '无法给观战者投票', icon: 'none' });
       return;
     }
-    this.setData({
-      selectedPlayerId: targetId
-    });
+    this.setData({ selectedPlayerId: targetId });
   },
 
   submitVote() {
     if (this.data.selectedPlayerId) {
-      app.globalData.socket.send({
-        data: JSON.stringify({
-          type: 'player_action',
-          payload: {
-            action: 'vote',
-            targetId: this.data.selectedPlayerId
-          }
-        })
-      });
-      this.setData({
-        selectedPlayerId: null,
-        gameState: 'waiting_for_results'
-      });
+      const target = this.data.players.find(p => p.id === this.data.selectedPlayerId);
+      if (target && target.isSpectator) {
+        wx.showToast({ title: '无法给观战者投票', icon: 'none' });
+        this.setData({ selectedPlayerId: null });
+        return;
+      }
+      app.globalData.socket.send({ data: JSON.stringify({ type: 'player_action', payload: { action: 'vote', targetId: this.data.selectedPlayerId } }) });
+      this.setData({ selectedPlayerId: null, hasVoted: true });
     }
   },
 
+  endGame() {
+    if (!this.data.isCreator) return;
+    wx.showModal({ title: '确认', content: '确定要结束当前游戏吗？', success: (res) => {
+      if (res.confirm) {
+        try {
+          app.globalData.socket.send({ data: JSON.stringify({ type: 'end_game' }) });
+        } catch (e) {
+          wx.showToast({ title: '无法发送结束命令', icon: 'none' });
+        }
+      }
+    }});
+  },
+
   onUnload() {
+    // If this user is a spectator and is leaving the game page (e.g. pressed back), notify server that they leave the room
+    try {
+      if (this.data.isSpectator && app.globalData && app.globalData.socket && app.globalData.roomId) {
+        app.globalData.socket.send({ data: JSON.stringify({ type: 'leave_room' }) });
+      }
+    } catch (e) {
+      // ignore send errors
+    }
+
+    if (this._handlerKey && app.globalData && app.globalData.unregisterMessageHandler) {
+      app.globalData.unregisterMessageHandler(this._handlerKey);
+    }
   }
 });

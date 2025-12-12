@@ -8,7 +8,7 @@
     <input class="input room-input" placeholder="输入房间号" bindinput="onRoomIdInput" />
     <checkbox-group bindchange="onSpectatorChange">
       <label class="checkbox-label">
-        <checkbox value="true"/>以观众身份加入
+        <checkbox value="true"/><view>以观众身份加入</view>
       </label>
     </checkbox-group>
     <button class="button join-button" bindtap="joinRoom">加入房间</button>

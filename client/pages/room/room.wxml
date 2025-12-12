@@ -1,5 +1,6 @@
 <!--pages/room/room.wxml-->
 <view class="container">
+  <view class="my-nickname" wx:if="{{myNickname}}">你的昵称：<text class="my-nickname-text">{{myNickname}}</text></view>
   <view class="room-info">房间号: {{roomId}}</view>
   
   <view class="players-list">
@@ -19,7 +20,14 @@
 
   <block wx:if="{{!isSpectator}}">
     <button class="button" bindtap="toggleReady">{{isReady ? '取消准备' : '准备'}}</button>
-    <button class="button start-button" type="primary" bindtap="startGame">开始游戏</button>
+    <block wx:if="{{isCreator}}">
+      <button class="button start-button" type="primary" bindtap="startGame">开始游戏</button>
+    </block>
+    <button class="button share-button" open-type="share">邀请好友</button>
   </block>
+
+
+  <!-- leave button visible to everyone (including spectators) -->
+  <button class="button leave-button" bindtap="leaveRoom">退出房间</button>
 
 </view>

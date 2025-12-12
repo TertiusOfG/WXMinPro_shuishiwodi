@@ -1,6 +1,7 @@
 <!--pages/game/game.wxml-->
 <view class="container">
   <view class="word-display-area" wx:if="{{!isSpectator}}">
+    <view class="current-player" wx:if="{{myNickname}}">你的昵称：<text class="current-player-nick">{{myNickname}}</text></view>
     <view class="word-label">你的词语</view>
     <view class="word">{{word}}</view>
   </view>
@@ -8,8 +9,8 @@
     <view class="word-label">观战模式</view>
   </view>
 
-  <scroll-view class="speeches-area" scroll-y="true" scroll-top="{{scrollTop}}">
-    <view wx:for="{{speeches}}" wx:key="index" class="speech-row {{item.playerId === myId ? 'my-speech-row' : 'other-speech-row'}}">
+  <scroll-view class="speeches-area" scroll-y="true" scroll-into-view="{{toView}}">
+    <view wx:for="{{speeches}}" wx:key="index" id="speech-{{index}}" class="speech-row {{item.playerId === myId ? 'my-speech-row' : 'other-speech-row'}}">
       <view class="speech-bubble {{item.playerId === myId ? 'my-speech-bubble' : 'other-speech-bubble'}}">
         <text class="speech-nickname">{{item.nickname}}</text>
         <text class="speech-message">{{item.message}}</text>
@@ -20,6 +21,7 @@
   <view class="game-status">
     <text wx:if="{{gameState === 'playing' && currentPlayerId}}">轮到 {{currentPlayerNickname}} 发言</text>
     <text wx:if="{{gameState === 'voting'}}">请投票</text>
+    <text wx:if="{{voteProgress}}">当前投票进度：{{voteProgress}}</text>
   </view>
 
   <view class="players-grid {{gameState === 'voting' && !isSpectator ? 'voting-active' : ''}}">
@@ -32,13 +34,17 @@
   <view class="action-area" wx:if="{{!isSpectator}}">
     <!-- Speech Input -->
     <block wx:if="{{gameState === 'playing' && isMyTurn}}">
-      <input class="speech-input" placeholder="请输入你的描述" value="{{speechInput}}" bindinput="onSpeechInput" />
+      <input class="speech-input" type="text" placeholder="请输入你的描述" value="{{speechInput}}" bindinput="onSpeechInput" bindconfirm="submitSpeech" />
       <button class="button" bindtap="submitSpeech">发言</button>
     </block>
 
     <!-- Voting Button -->
     <block wx:if="{{gameState === 'voting'}}">
-      <button class="button" bindtap="submitVote" disabled="{{!selectedPlayerId}}">确认投票</button>
+      <button class="button" bindtap="submitVote" disabled="{{!selectedPlayerId || hasVoted}}">{{hasVoted ? '已投票' : '确认投票'}}</button>
+    </block>
+    <!-- Creator-only: End Game -->
+    <block wx:if="{{isCreator && gameState !== 'waiting'}}">
+      <button class="button end-game-button" bindtap="endGame">结束游戏</button>
     </block>
   </view>
 </view>

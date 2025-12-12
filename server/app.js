@@ -37,8 +37,10 @@ const broadcastRoomState = (roomId) => {
         type: 'room_update',
         payload: {
             roomId: room.id,
+            creatorId: room.creatorId,
             players: room.players.map(p => ({ id: p.id, nickname: p.nickname, isReady: p.isReady, isSpectator: p.isSpectator })),
             gameState: room.gameState,
+            currentPlayerId: (room.gamePlayerIds && typeof room.turnIndex === 'number') ? room.gamePlayerIds[room.turnIndex] : null,
         }
     };
 
@@ -70,7 +72,7 @@ const broadcastTurnUpdate = (roomId) => {
 const broadcastGameOver = (roomId, winner) => {
     const room = rooms[roomId];
     if (!room) return;
-
+    // Send final game_over payload to all players
     room.gameState = 'finished';
     const undercover = getActualPlayers(roomId).find(p => p.isUndercover);
 
@@ -86,6 +88,28 @@ const broadcastGameOver = (roomId, winner) => {
     room.players.forEach(player => {
         player.ws.send(JSON.stringify(gameOverPayload));
     });
+
+    // Reset game-specific state so the room is ready for a new game
+    // Clear per-game tracking fields
+    room.gamePlayerIds = null;
+    room.turnIndex = null;
+    room.votes = {};
+    room.speeches = [];
+
+    // Reset player-specific flags used during a game
+    room.players.forEach(p => {
+        delete p.word;
+        p.isUndercover = false;
+        p.isEliminated = false;
+        // keep isSpectator as-is; reset readiness so players must ready for next game
+        p.isReady = false;
+    });
+
+    // Move room back to waiting state so lobby UI can transition
+    room.gameState = 'waiting';
+
+    // Broadcast the cleared room state to all connected clients
+    broadcastRoomState(roomId);
 };
 
 wss.on('connection', (ws) => {
@@ -101,11 +125,65 @@ wss.on('connection', (ws) => {
         const { type, payload } = data;
 
         switch (type) {
+            case 'end_game':
+                if (!playerRoomId || !rooms[playerRoomId]) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '房间不存在' } }));
+                    break;
+                }
+                const roomToEnd = rooms[playerRoomId];
+                // only creator can terminate the game
+                if (roomToEnd.creatorId !== playerId) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '只有房主可以终止游戏' } }));
+                    break;
+                }
+                // If no active game, nothing to do
+                if (!roomToEnd || roomToEnd.gameState === 'waiting') {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '当前没有进行中的游戏' } }));
+                    break;
+                }
+
+                // Notify all players that the game was terminated by creator
+                roomToEnd.players.forEach(p => {
+                    try { p.ws.send(JSON.stringify({ type: 'game_terminated', payload: { message: '房主已终止当前游戏' } })); }
+                    catch (e) {}
+                });
+
+                // Reset per-game state similar to broadcastGameOver cleanup
+                roomToEnd.gamePlayerIds = null;
+                roomToEnd.turnIndex = null;
+                roomToEnd.votes = {};
+                roomToEnd.speeches = [];
+                roomToEnd.players.forEach(p => {
+                    delete p.word;
+                    p.isUndercover = false;
+                    p.isEliminated = false;
+                    p.isReady = false;
+                });
+                roomToEnd.gameState = 'waiting';
+
+                // Broadcast updated room state
+                broadcastRoomState(playerRoomId);
+                break;
             case 'create_room':
+                // Prevent a player from being in more than one room
+                if (Object.values(rooms).some(r => r.players.some(p => p.id === playerId))) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '您已在一个房间中，无法创建新的房间' } }));
+                    break;
+                }
+
+                // Validate nickname
+                const creatorNick = (payload.nickname || '').trim();
+                if (!creatorNick) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '请输入有效的昵称' } }));
+                    break;
+                }
+
                 const roomId = generateRoomId();
                 rooms[roomId] = {
                     id: roomId,
-                    players: [{ id: playerId, nickname: payload.nickname, isReady: false, ws, isSpectator: false }],
+                    // record creatorId so we can destroy the room if the creator leaves
+                    creatorId: playerId,
+                    players: [{ id: playerId, nickname: creatorNick, isReady: false, ws, isSpectator: false }],
                     gameState: 'waiting',
                 };
                 playerRoomId = roomId;
@@ -118,20 +196,112 @@ wss.on('connection', (ws) => {
                 const isSpectator = payload.isSpectator || false;
 
                 if (roomToJoin) {
+                    // Prevent a player from being in more than one room
+                    if (Object.values(rooms).some(r => r.players.some(p => p.id === playerId))) {
+                        ws.send(JSON.stringify({ type: 'error', payload: { message: '您已在一个房间中，无法加入另一个房间' } }));
+                        return;
+                    }
+
                     if (!isSpectator && roomToJoin.gameState !== 'waiting') {
                         ws.send(JSON.stringify({ type: 'error', payload: { message: 'Game has already started.' } }));
                         return;
                     }
 
-                    roomToJoin.players.push({ id: playerId, nickname: payload.nickname, isReady: false, ws, isSpectator });
+                    // Validate nickname presence
+                    const joinNick = (payload.nickname || '').trim();
+                    if (!joinNick) {
+                        ws.send(JSON.stringify({ type: 'error', payload: { message: '请输入有效的昵称' } }));
+                        return;
+                    }
+
+                    // Enforce unique nickname within the room (case-insensitive)
+                    const nameTaken = roomToJoin.players.some(p => (p.nickname || '').trim().toLowerCase() === joinNick.toLowerCase());
+                    if (nameTaken) {
+                        ws.send(JSON.stringify({ type: 'nick_taken', payload: { message: '该昵称已被房间内其他玩家使用，请换一个昵称' } }));
+                        return;
+                    }
+
+                    roomToJoin.players.push({ id: playerId, nickname: joinNick, isReady: false, ws, isSpectator });
                     playerRoomId = payload.roomId;
                     broadcastRoomState(payload.roomId);
 
                     if (isSpectator && roomToJoin.gameState === 'playing') {
-                        // TODO: Send full game state to spectator
+                        // Send existing speeches to the new spectator so they see history
+                        if (roomToJoin.speeches && roomToJoin.speeches.length > 0) {
+                            roomToJoin.speeches.forEach(speech => {
+                                ws.send(JSON.stringify({ type: 'new_speech', payload: speech }));
+                            });
+                        }
+                        // Also send the current turn info so spectator sees who is next
+                        if (roomToJoin.gamePlayerIds && typeof roomToJoin.turnIndex === 'number') {
+                            const currentPlayerId = roomToJoin.gamePlayerIds[roomToJoin.turnIndex];
+                            ws.send(JSON.stringify({ type: 'turn_update', payload: { currentPlayerId } }));
+                        }
                     }
                 } else {
                     ws.send(JSON.stringify({ type: 'error', payload: { message: 'Room not found.' } }));
+                }
+                break;
+
+            case 'get_room_state':
+                {
+                    const rid = payload.roomId;
+                    const room = rooms[rid];
+                    if (room) {
+                        const state = {
+                            type: 'room_update',
+                            payload: {
+                                roomId: room.id,
+                                players: room.players.map(p => ({ id: p.id, nickname: p.nickname, isReady: p.isReady, isSpectator: p.isSpectator })),
+                                gameState: room.gameState,
+                                currentPlayerId: (room.gamePlayerIds && typeof room.turnIndex === 'number') ? room.gamePlayerIds[room.turnIndex] : null,
+                            }
+                        };
+                        ws.send(JSON.stringify(state));
+                    } else {
+                        ws.send(JSON.stringify({ type: 'error', payload: { message: 'Room not found.' } }));
+                    }
+                }
+                break;
+
+            case 'leave_room':
+                if (playerRoomId && rooms[playerRoomId]) {
+                    const room = rooms[playerRoomId];
+
+                    // If the room creator leaves, close the room and notify everyone
+                    if (room.creatorId === playerId) {
+                        room.players.forEach(p => {
+                            if (p.id !== playerId) {
+                                try {
+                                    p.ws.send(JSON.stringify({ type: 'room_closed', payload: { message: '房主已退出，房间已关闭' } }));
+                                } catch (e) {
+                                    // ignore send errors
+                                }
+                            }
+                        });
+
+                        // Remove the room entirely
+                        delete rooms[playerRoomId];
+                        playerRoomId = null;
+                        break;
+                    }
+
+                    // Normal leave: remove the leaving player
+                    const leavingPlayerObj = room.players.find(p => p.id === playerId);
+                    room.players = room.players.filter(p => p.id !== playerId);
+
+                    // If no players left, remove the room
+                    if (room.players.length === 0) {
+                        delete rooms[playerRoomId];
+                    } else {
+                        // If leaving player was an active game player, mark eliminated for remaining record if needed
+                        if (room.gameState === 'playing' && room.gamePlayerIds && room.gamePlayerIds.includes(playerId)) {
+                            // Mark as eliminated in a historical sense; create a placeholder if needed
+                            // (we removed the leaving player from the players list already)
+                        }
+                        broadcastRoomState(playerRoomId);
+                    }
+                    playerRoomId = null;
                 }
                 break;
 
@@ -181,11 +351,19 @@ wss.on('connection', (ws) => {
                 const actionRoom = rooms[playerRoomId];
                 const actingPlayer = actionRoom ? actionRoom.players.find(p => p.id === playerId) : null;
 
-                if (!actionRoom || !actingPlayer || actingPlayer.isSpectator || actionRoom.gameState !== 'playing') {
+                if (!actionRoom || !actingPlayer || actingPlayer.isSpectator) {
                     return;
                 }
 
                 const { action, targetId, message } = payload;
+
+                // Validate per-action allowed gameState
+                if (action === 'speak' && actionRoom.gameState !== 'playing') {
+                    return;
+                }
+                if (action === 'vote' && actionRoom.gameState !== 'voting') {
+                    return;
+                }
 
                 if (action === 'speak' && actionRoom.gamePlayerIds[actionRoom.turnIndex] === playerId) {
                     const speech = { playerId, nickname: actingPlayer.nickname, message };
@@ -212,10 +390,41 @@ wss.on('connection', (ws) => {
                     }
 
                 } else if (action === 'vote') {
+                    console.log(`Received vote from ${playerId} -> ${targetId}`);
+
+                    // Prevent voting targeting invalid players (non-existent, spectators, or already eliminated)
+                    const targetPlayer = actionRoom.players.find(p => p.id === targetId);
+                    if (!targetPlayer) {
+                        actingPlayer.ws.send(JSON.stringify({ type: 'vote_error', payload: { message: '投票目标不存在' } }));
+                        break;
+                    }
+                    if (targetPlayer.isSpectator) {
+                        actingPlayer.ws.send(JSON.stringify({ type: 'vote_error', payload: { message: '不能给观战者投票' } }));
+                        break;
+                    }
+                    if (targetPlayer.isEliminated) {
+                        actingPlayer.ws.send(JSON.stringify({ type: 'vote_error', payload: { message: '该玩家已出局，无法投票' } }));
+                        break;
+                    }
+
+                    // Prevent double-voting by same player
+                    if (actionRoom.votes[playerId]) {
+                        console.log(`Player ${playerId} attempted to vote again; ignoring.`);
+                        // Optionally notify the player
+                        actingPlayer.ws.send(JSON.stringify({ type: 'vote_error', payload: { message: '您已投票' } }));
+                        break;
+                    }
+
                     actionRoom.votes[playerId] = targetId;
                     const activePlayers = getActualPlayers(playerRoomId).filter(p => !p.isEliminated);
 
-                    if (Object.keys(actionRoom.votes).length === activePlayers.length) {
+                    // Broadcast a lightweight vote progress update to the room
+                    const votesCount = Object.keys(actionRoom.votes).length;
+                    actionRoom.players.forEach(p => p.ws.send(JSON.stringify({ type: 'vote_update', payload: { votesReceived: votesCount, total: activePlayers.length } })));
+
+                    console.log(`Votes: ${votesCount}/${activePlayers.length}`);
+
+                    if (votesCount === activePlayers.length) {
                         const voteCounts = {};
                         for (const voterId in actionRoom.votes) {
                             const votedId = actionRoom.votes[voterId];
@@ -264,16 +473,33 @@ wss.on('connection', (ws) => {
         console.log(`Client ${playerId} disconnected`);
         if (playerRoomId && rooms[playerRoomId]) {
             const room = rooms[playerRoomId];
+
+            // If the room creator disconnected, close the room and notify everyone
+            if (room.creatorId === playerId) {
+                room.players.forEach(p => {
+                    if (p.id !== playerId) {
+                        try {
+                            p.ws.send(JSON.stringify({ type: 'room_closed', payload: { message: '房主已退出，房间已关闭' } }));
+                        } catch (e) {
+                            // ignore send errors
+                        }
+                    }
+                });
+
+                delete rooms[playerRoomId];
+                return;
+            }
+
+            // Normal disconnect: remove the disconnected player
+            const leavingPlayerObj = room.players.find(p => p.id === playerId);
             room.players = room.players.filter(p => p.id !== playerId);
-            
+
             if (room.players.length === 0) {
                 delete rooms[playerRoomId];
             } else {
-                // If the disconnected user was a player in an active game, handle it
+                // If the disconnected user was a player in an active game, you may want to handle elimination
                 if (room.gameState === 'playing' && room.gamePlayerIds && room.gamePlayerIds.includes(playerId)) {
-                    const player = room.players.find(p => p.id === playerId);
-                    if(player) player.isEliminated = true; // Mark as eliminated
-                    // Potentially check for game over condition here as well
+                    // We already removed the player object; additional handling could be implemented here
                 }
                 broadcastRoomState(playerRoomId);
             }
