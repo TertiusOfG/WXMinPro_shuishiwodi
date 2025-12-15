@@ -1,16 +1,31 @@
-
 <!--pages/index/index.wxml-->
 <view class="container">
   <view class="title">谁是卧底</view>
-  <input class="input" placeholder="请输入你的昵称" bindinput="onNicknameInput" />
-  <button class="button" type="primary" bindtap="createRoom">创建房间</button>
-  <view class="join-section">
-    <input class="input room-input" placeholder="输入房间号" bindinput="onRoomIdInput" />
+
+  <button class="main-button" type="primary" bindtap="goToSetup">马上开始</button>
+  
+  <button class="main-button" type="default" bindtap="showJoinModal">输入房间号</button>
+
+  <view class="link-text" bindtap="goToCategories">查看词汇列表</view>
+</view>
+
+<!-- Join Room Modal -->
+<view class="modal-overlay" wx:if="{{showModal}}" bindtap="hideJoinModal">
+  <view class="modal-content" catchtap="stopPropagation">
+    <view class="modal-title">加入房间</view>
+    
+    <input class="modal-input" placeholder="输入昵称" bindinput="onNicknameInput" value="{{nickname}}" />
+    <input class="modal-input" placeholder="输入房间号" bindinput="onRoomIdInput" value="{{roomId}}" />
+    
     <checkbox-group bindchange="onSpectatorChange">
       <label class="checkbox-label">
-        <checkbox value="true"/><view>以观众身份加入</view>
+        <checkbox value="true"/><text>以观众身份加入</text>
       </label>
     </checkbox-group>
-    <button class="button join-button" bindtap="joinRoom">加入房间</button>
+
+    <view class="modal-buttons">
+      <button class="modal-button cancel-button" bindtap="hideJoinModal">取消</button>
+      <button class="modal-button confirm-button" type="primary" bindtap="joinRoom">确定</button>
+    </view>
   </view>
 </view>

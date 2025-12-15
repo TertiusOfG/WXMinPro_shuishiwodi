@@ -3,8 +3,13 @@
   <view class="my-nickname" wx:if="{{myNickname}}">你的昵称：<text class="my-nickname-text">{{myNickname}}</text></view>
   <view class="room-info">房间号: {{roomId}}</view>
   
+  <!-- NEW: Show game configuration -->
+  <view class="game-config" wx:if="{{maxPlayers}}">
+    <text>玩家总数: {{maxPlayers}} | 卧底数: {{undercoverCount}}</text>
+  </view>
+  
   <view class="players-list">
-    <view class="list-title">玩家列表 ({{players.length}})</view>
+    <view class="list-title">玩家列表 ({{players.length}}/{{maxPlayers || '?'}})</view>
     <view wx:for="{{players}}" wx:key="id" class="player-item {{item.isReady ? 'ready' : ''}}">
       <text>{{item.nickname}}</text>
       <text>{{item.isReady ? '已准备' : '未准备'}}</text>

@@ -1,0 +1,16 @@
+&lt;!--pages/categories/categories.wxml--&gt;
+&lt;view class="container"&gt;
+  &lt;view class="title"&gt;词汇列表&lt;/view&gt;
+  
+  &lt;view class="notice"&gt;
+    &lt;text&gt;游戏时将从以下词汇中随机选择&lt;/text&gt;
+  &lt;/view&gt;
+
+  &lt;view class="categories-list"&gt;
+    &lt;view wx:for="{{wordPairs}}" wx:key="index" class="word-pair-item"&gt;
+      &lt;view class="word civilian-word"&gt;{{item.civilian}}&lt;/view&gt;
+      &lt;view class="arrow"&gt;↔&lt;/view&gt;
+      &lt;view class="word undercover-word"&gt;{{item.undercover}}&lt;/view&gt;
+    &lt;/view&gt;
+  &lt;/view&gt;
+&lt;/view&gt;

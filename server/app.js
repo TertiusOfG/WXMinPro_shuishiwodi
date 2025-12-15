@@ -38,6 +38,8 @@ const broadcastRoomState = (roomId) => {
         payload: {
             roomId: room.id,
             creatorId: room.creatorId,
+            maxPlayers: room.maxPlayers || 4,           // NEW
+            undercoverCount: room.undercoverCount || 1, // NEW
             players: room.players.map(p => ({ id: p.id, nickname: p.nickname, isReady: p.isReady, isSpectator: p.isSpectator })),
             gameState: room.gameState,
             currentPlayerId: (room.gamePlayerIds && typeof room.turnIndex === 'number') ? room.gamePlayerIds[room.turnIndex] : null,
@@ -145,7 +147,7 @@ wss.on('connection', (ws) => {
                 // Notify all players that the game was terminated by creator
                 roomToEnd.players.forEach(p => {
                     try { p.ws.send(JSON.stringify({ type: 'game_terminated', payload: { message: '房主已终止当前游戏' } })); }
-                    catch (e) {}
+                    catch (e) { }
                 });
 
                 // Reset per-game state similar to broadcastGameOver cleanup
@@ -167,7 +169,7 @@ wss.on('connection', (ws) => {
             case 'create_room':
                 // Prevent a player from being in more than one room
                 if (Object.values(rooms).some(r => r.players.some(p => p.id === playerId))) {
-                    ws.send(JSON.stringify({ type: 'error', payload: { message: '您已在一个房间中，无法创建新的房间' } }));
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '您已在一个房间中,无法创建新的房间' } }));
                     break;
                 }
 
@@ -178,11 +180,35 @@ wss.on('connection', (ws) => {
                     break;
                 }
 
+                // NEW: Get and validate game configuration
+                const maxPlayers = parseInt(payload.maxPlayers) || 4;
+                const undercoverCount = parseInt(payload.undercoverCount) || 1;
+
+                // Validation: undercover count must be less than max players
+                if (undercoverCount >= maxPlayers) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '卧底人数必须少于玩家总人数' } }));
+                    break;
+                }
+
+                // Validation: minimum 3 players
+                if (maxPlayers < 3) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '玩家总人数至少需要3人' } }));
+                    break;
+                }
+
+                // Validation: at least 1 undercover
+                if (undercoverCount < 1) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '卧底人数至少需要1人' } }));
+                    break;
+                }
+
                 const roomId = generateRoomId();
                 rooms[roomId] = {
                     id: roomId,
                     // record creatorId so we can destroy the room if the creator leaves
                     creatorId: playerId,
+                    maxPlayers: maxPlayers,           // NEW
+                    undercoverCount: undercoverCount, // NEW
                     players: [{ id: playerId, nickname: creatorNick, isReady: false, ws, isSpectator: false }],
                     gameState: 'waiting',
                 };
@@ -321,6 +347,22 @@ wss.on('connection', (ws) => {
                 const actualPlayers = getActualPlayers(playerRoomId);
 
                 if (gameRoom && actualPlayers.length > 1 && actualPlayers.every(p => p.isReady)) {
+                    // NEW: Validate player count meets configured maximum
+                    const configuredMax = gameRoom.maxPlayers || 4;
+                    const configuredUndercover = gameRoom.undercoverCount || 1;
+
+                    // Check minimum player count
+                    if (actualPlayers.length < 3) {
+                        ws.send(JSON.stringify({ type: 'error', payload: { message: '至少需要3名玩家才能开始游戏' } }));
+                        break;
+                    }
+
+                    // Ensure we have enough players for the configured undercover count
+                    if (actualPlayers.length <= configuredUndercover) {
+                        ws.send(JSON.stringify({ type: 'error', payload: { message: `玩家人数必须大于卧底人数(${configuredUndercover})` } }));
+                        break;
+                    }
+
                     gameRoom.gameState = 'playing';
                     gameRoom.gamePlayerIds = actualPlayers.map(p => p.id);
                     gameRoom.turnIndex = 0;
@@ -328,12 +370,23 @@ wss.on('connection', (ws) => {
                     gameRoom.speeches = [];
 
                     const wordPair = words[Math.floor(Math.random() * words.length)];
-                    const undercoverIndex = Math.floor(Math.random() * actualPlayers.length);
+
+                    // NEW: Randomly select multiple undercovers
+                    const undercoverIndices = [];
+                    const playerIndices = actualPlayers.map((_, i) => i);
+
+                    // Shuffle and pick first N indices for undercovers
+                    for (let i = 0; i < configuredUndercover; i++) {
+                        const randomIdx = Math.floor(Math.random() * playerIndices.length);
+                        undercoverIndices.push(playerIndices[randomIdx]);
+                        playerIndices.splice(randomIdx, 1); // Remove to avoid duplicates
+                    }
 
                     actualPlayers.forEach((player, index) => {
-                        const word = (index === undercoverIndex) ? wordPair.undercover : wordPair.civilian;
+                        const isUndercover = undercoverIndices.includes(index);
+                        const word = isUndercover ? wordPair.undercover : wordPair.civilian;
                         player.word = word;
-                        player.isUndercover = (index === undercoverIndex);
+                        player.isUndercover = isUndercover;
                         player.isEliminated = false;
 
                         player.ws.send(JSON.stringify({

@@ -5,13 +5,14 @@ Page({
   data: {
     nickname: '',
     roomId: '',
-    isSpectator: false
+    isSpectator: false,
+    showModal: false  // NEW: Control join modal visibility
   },
 
   onLoad(options) {
-    // If opened via share link, prefill roomId
+    // If opened via share link, prefill roomId and show modal
     if (options && options.roomId) {
-      this.setData({ roomId: options.roomId });
+      this.setData({ roomId: options.roomId, showModal: true });
       if (app.globalData) app.globalData.roomId = options.roomId;
     }
     // Connect to WebSocket server
@@ -25,8 +26,8 @@ Page({
       // ensure message handler registry exists
       if (!app.globalData.messageHandlers) {
         app.globalData.messageHandlers = {};
-        app.globalData.registerMessageHandler = function(key, fn) { this.messageHandlers[key] = fn; };
-        app.globalData.unregisterMessageHandler = function(key) { delete this.messageHandlers[key]; };
+        app.globalData.registerMessageHandler = function (key, fn) { this.messageHandlers[key] = fn; };
+        app.globalData.unregisterMessageHandler = function (key) { delete this.messageHandlers[key]; };
       }
 
       // set a single dispatcher for incoming messages that forwards to registered handlers
@@ -61,7 +62,7 @@ Page({
             // If server marks us as a spectator and the game is already playing, go straight to spectate view
             const me = (data.payload.players || []).find(p => p.id === app.globalData.userInfo.id);
             const isSpectatorServer = me ? !!me.isSpectator : false;
-              if (data.payload.gameState === 'playing' && isSpectatorServer) {
+            if (data.payload.gameState === 'playing' && isSpectatorServer) {
               if (app.globalData && app.globalData.unregisterMessageHandler) app.globalData.unregisterMessageHandler('index');
               wx.navigateTo({ url: `/pages/game/game?word=&isSpectator=true` });
             } else {
@@ -91,14 +92,14 @@ Page({
         }
       });
 
-    // unregister index handler when leaving the page
-    const pageOnUnload = this.onUnload;
-    this.onUnload = function() {
-      if (app.globalData && app.globalData.unregisterMessageHandler) {
-        app.globalData.unregisterMessageHandler('index');
-      }
-      if (typeof pageOnUnload === 'function') pageOnUnload.apply(this, arguments);
-    };
+      // unregister index handler when leaving the page
+      const pageOnUnload = this.onUnload;
+      this.onUnload = function () {
+        if (app.globalData && app.globalData.unregisterMessageHandler) {
+          app.globalData.unregisterMessageHandler('index');
+        }
+        if (typeof pageOnUnload === 'function') pageOnUnload.apply(this, arguments);
+      };
     });
 
     socket.onError((err) => {
@@ -158,6 +159,31 @@ Page({
     }
   },
 
+  // NEW: Navigate to setup page
+  goToSetup() {
+    wx.navigateTo({ url: '/pages/setup/setup' });
+  },
+
+  // NEW: Show join room modal
+  showJoinModal() {
+    this.setData({ showModal: true });
+  },
+
+  // NEW: Hide join room modal
+  hideJoinModal() {
+    this.setData({ showModal: false });
+  },
+
+  // NEW: Stop propagation to prevent closing modal when clicking inside
+  stopPropagation() {
+    // Do nothing, just prevent event bubbling
+  },
+
+  // NEW: Navigate to categories page
+  goToCategories() {
+    wx.navigateTo({ url: '/pages/categories/categories' });
+  },
+
   onNicknameInput(e) {
     this.setData({ nickname: e.detail.value });
   },
@@ -172,19 +198,6 @@ Page({
     });
   },
 
-  createRoom() {
-    if (!this.data.nickname) {
-      wx.showToast({ title: '请输入昵称', icon: 'none' });
-      return;
-    }
-    app.globalData.userInfo.nickname = this.data.nickname;
-    const msg = {
-      type: 'create_room',
-      payload: { nickname: this.data.nickname }
-    };
-    app.globalData.socket.send({ data: JSON.stringify(msg) });
-  },
-
   joinRoom() {
     if (!this.data.nickname || !this.data.roomId) {
       wx.showToast({ title: '请输入昵称和房间号', icon: 'none' });
@@ -194,12 +207,15 @@ Page({
     app.globalData.roomId = this.data.roomId;
     const msg = {
       type: 'join_room',
-      payload: { 
-        nickname: this.data.nickname, 
+      payload: {
+        nickname: this.data.nickname,
         roomId: this.data.roomId,
         isSpectator: this.data.isSpectator
       }
     };
     app.globalData.socket.send({ data: JSON.stringify(msg) });
+
+    // Hide modal after sending join request
+    this.setData({ showModal: false });
   }
 });

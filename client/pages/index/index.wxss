@@ -4,64 +4,109 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   padding: 60rpx 40rpx;
   min-height: 100vh;
   background: linear-gradient(to bottom, #FAFAFA 0%, #F5F5F5 100%);
 }
 
 .title {
-  font-size: 64rpx;
+  font-size: 72rpx;
   font-weight: bold;
-  margin-bottom: 100rpx;
+  margin-bottom: 120rpx;
   color: #F9A825; /* Warm Gold */
   text-shadow: 0 2rpx 8rpx rgba(249, 168, 37, 0.2);
-  letter-spacing: 4rpx;
+  letter-spacing: 6rpx;
 }
 
-.input {
-  width: 80%;
-  height: 88rpx;
-  border: 2rpx solid #E0E0E0;
-  border-radius: 44rpx; /* Pill shape */
-  padding: 0 32rpx;
-  margin-bottom: 40rpx;
-  background-color: white;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
-  font-size: 30rpx;
-  transition: all 0.3s ease;
+.main-button {
+  width: 70%;
+  height: 96rpx;
+  margin-bottom: 32rpx;
+  border-radius: 48rpx;
+  font-size: 36rpx;
+  font-weight: bold;
 }
 
-.input:focus {
-  border-color: #4FC3F7;
-  box-shadow: 0 4rpx 16rpx rgba(79, 195, 247, 0.2);
+.link-text {
+  margin-top: 40rpx;
+  font-size: 28rpx;
+  color: #4FC3F7; /* Heavenly Blue */
+  text-decoration: underline;
+  cursor: pointer;
 }
 
-.button {
-  width: 80%;
-  margin-bottom: 24rpx;
-}
-
-.join-section {
-  /* display: flex; */
-  width: 80%;
-  margin-top: 60rpx;
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
-.room-input {
-  flex-grow: 1;
-  margin-right: 20rpx;
-  margin-bottom: 20rpx;
+.modal-content {
+  width: 80%;
+  background-color: white;
+  border-radius: 24rpx;
+  padding: 48rpx 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.2);
+}
+
+.modal-title {
+  font-size: 40rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 48rpx;
+  color: #F9A825;
+}
+
+.modal-input {
+  width: 100%;
+  height: 80rpx;
+  border: 2rpx solid #E0E0E0;
+  border-radius: 40rpx;
+  padding: 0 28rpx;
+  margin-bottom: 28rpx;
+  background-color: #FAFAFA;
+  font-size: 28rpx;
 }
 
 .checkbox-label {
   display: flex;
-  margin-bottom: 20rpx;
+  align-items: center;
+  margin-bottom: 32rpx;
+  font-size: 28rpx;
+  color: #666;
 }
 
-.join-button {
-  width: auto;
-  flex-shrink: 0;
-  padding: 15rpx 40rpx;
-  margin-bottom: 20rpx;
+.checkbox-label checkbox {
+  margin-right: 12rpx;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20rpx;
+}
+
+.modal-button {
+  width: 45%;
+  height: 72rpx;
+  border-radius: 36rpx;
+  font-size: 30rpx;
+}
+
+.cancel-button {
+  background-color: #E0E0E0;
+  color: #666;
+}
+
+.confirm-button {
+  background-color: #F9A825;
 }

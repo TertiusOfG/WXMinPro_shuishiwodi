@@ -1,0 +1,20 @@
+&lt;!--pages/setup/setup.wxml--&gt;
+&lt;view class="container"&gt;
+  &lt;view class="title"&gt;游戏设置&lt;/view&gt;
+
+  &lt;view class="config-section"&gt;
+    &lt;view class="config-item"&gt;
+      &lt;text class="config-label"&gt;玩家总人数&lt;/text&gt;
+      &lt;input class="config-input" type="number" value="{{maxPlayers}}" bindinput="onMaxPlayersInput" /&gt;
+    &lt;/view&gt;
+
+    &lt;view class="config-item"&gt;
+      &lt;text class="config-label"&gt;卧底人数&lt;/text&gt;
+      &lt;input class="config-input" type="number" value="{{undercoverCount}}" bindinput="onUndercoverCountInput" /&gt;
+    &lt;/view&gt;
+  &lt;/view&gt;
+
+  &lt;input class="nickname-input" placeholder="输入昵称" bindinput="onNicknameInput" value="{{nickname}}" /&gt;
+
+  &lt;button class="start-button" type="primary" bindtap="createGame"&gt;开 局&lt;/button&gt;
+&lt;/view&gt;

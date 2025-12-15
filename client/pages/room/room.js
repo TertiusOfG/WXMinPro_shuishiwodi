@@ -8,9 +8,9 @@ Page({
     spectators: [],
     isReady: false,
     isSpectator: false
-    ,myNickname: ''
-    ,creatorId: null
-    ,isCreator: false
+    , myNickname: ''
+    , creatorId: null
+    , isCreator: false
   },
 
   onLoad(options) {
@@ -23,17 +23,17 @@ Page({
     }
 
     if (app.globalData.room) {
-        this.updateRoomData(app.globalData.room);
+      this.updateRoomData(app.globalData.room);
     } else {
-        // Request room state from server in case of re-join or race
-        try {
-          app.globalData.socket.send({ data: JSON.stringify({ type: 'get_room_state', payload: { roomId: options.roomId } }) });
-        } catch (e) {
-          console.warn('get_room_state send failed', e);
-        }
+      // Request room state from server in case of re-join or race
+      try {
+        app.globalData.socket.send({ data: JSON.stringify({ type: 'get_room_state', payload: { roomId: options.roomId } }) });
+      } catch (e) {
+        console.warn('get_room_state send failed', e);
+      }
     }
     // register a message handler so we don't overwrite global socket.onMessage
-    this._handlerKey = `room_${Math.random().toString(36).substring(2,8)}`;
+    this._handlerKey = `room_${Math.random().toString(36).substring(2, 8)}`;
     app.globalData.registerMessageHandler(this._handlerKey, (res) => {
       const data = JSON.parse(res.data);
       console.log('Room received:', data);
@@ -91,14 +91,16 @@ Page({
     const allUsers = roomData.players || [];
     const currentUser = allUsers.find(p => p.id === app.globalData.userInfo.id);
 
-    this.setData({ 
+    this.setData({
       players: allUsers.filter(p => !p.isSpectator),
       spectators: allUsers.filter(p => p.isSpectator),
       isSpectator: currentUser ? currentUser.isSpectator : false,
       isReady: currentUser ? !!currentUser.isReady : false,
-      myNickname: (currentUser && currentUser.nickname) ? currentUser.nickname : (app.globalData.userInfo && app.globalData.userInfo.nickname ? app.globalData.userInfo.nickname : '')
-      ,creatorId: roomData.creatorId || null
-      ,isCreator: (roomData.creatorId === (app.globalData.userInfo && app.globalData.userInfo.id))
+      myNickname: (currentUser && currentUser.nickname) ? currentUser.nickname : (app.globalData.userInfo && app.globalData.userInfo.nickname ? app.globalData.userInfo.nickname : ''),
+      creatorId: roomData.creatorId || null,
+      isCreator: (roomData.creatorId === (app.globalData.userInfo && app.globalData.userInfo.id)),
+      maxPlayers: roomData.maxPlayers || 4,           // NEW
+      undercoverCount: roomData.undercoverCount || 1  // NEW
     });
   },
 
