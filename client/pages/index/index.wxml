@@ -19,7 +19,7 @@
       <button class="modal-avatar-button" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
         <image class="modal-avatar" src="{{avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
       </button>
-      <input class="modal-input" type="nickname" placeholder="输入昵称" bindinput="onNicknameInput" value="{{nickname}}" />
+      <input class="modal-input" type="text" placeholder="输入昵称" bindinput="onNicknameInput" value="{{nickname}}" />
     </view>
     
     <input class="modal-input" placeholder="输入房间号" bindinput="onRoomIdInput" value="{{roomId}}" />

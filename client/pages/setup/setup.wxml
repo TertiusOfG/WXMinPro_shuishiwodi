@@ -28,7 +28,7 @@
     <button class="avatar-button" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
       <image class="avatar" src="{{avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
     </button>
-    <input class="nickname-input" type="nickname" placeholder="输入昵称" bindinput="onNicknameInput" value="{{nickname}}" />
+    <input class="nickname-input" type="text" placeholder="输入昵称" bindinput="onNicknameInput" value="{{nickname}}" />
   </view>
 
   <button class="start-button" type="primary" bindtap="createGame">开 局</button>
