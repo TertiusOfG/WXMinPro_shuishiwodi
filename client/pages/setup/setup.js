@@ -33,6 +33,52 @@ Page({
         // Calculate initial valid range and undercover options
         this.updateValidRange(this.data.maxPlayers);
         this.updateUndercoverOptions(this.data.maxPlayers);
+
+        // FIX: Register message handler to receive room_created response
+        this._handlerKey = `setup_${Math.random().toString(36).substring(2, 8)}`;
+        app.globalData.registerMessageHandler(this._handlerKey, (res) => {
+            const data = JSON.parse(res.data);
+            console.log('Setup received:', data);
+
+            if (data.type === 'room_created') {
+                app.globalData.roomId = data.payload.roomId;
+
+                // Store room config immediately so room page can display it
+                app.globalData.room = {
+                    roomId: data.payload.roomId,
+                    maxPlayers: data.payload.maxPlayers,
+                    undercoverCount: data.payload.undercoverCount
+                };
+
+                // Unregister handler before navigating
+                if (this._handlerKey && app.globalData && app.globalData.unregisterMessageHandler) {
+                    app.globalData.unregisterMessageHandler(this._handlerKey);
+                }
+
+                wx.navigateTo({ url: `/pages/room/room?roomId=${data.payload.roomId}` });
+            } else if (data.type === 'error') {
+                wx.showToast({ title: data.payload.message, icon: 'none' });
+            }
+        });
+    },
+
+    onUnload() {
+        // FIX: Send leave_room to clean up server state if user backs out
+        // This handles the case where user navigates back before room is fully created
+        try {
+            if (app.globalData && app.globalData.socket && app.globalData.roomId) {
+                app.globalData.socket.send({ data: JSON.stringify({ type: 'leave_room' }) });
+                app.globalData.roomId = null;
+                app.globalData.room = null;
+            }
+        } catch (e) {
+            console.warn('setup onUnload: leave_room send failed', e);
+        }
+
+        // Unregister message handler when leaving page
+        if (this._handlerKey && app.globalData && app.globalData.unregisterMessageHandler) {
+            app.globalData.unregisterMessageHandler(this._handlerKey);
+        }
     },
 
     updateValidRange(maxPlayers) {
