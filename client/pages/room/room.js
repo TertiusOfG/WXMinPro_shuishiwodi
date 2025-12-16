@@ -67,6 +67,24 @@ Page({
         }
         // navigate back to index (use reLaunch to reset stack)
         wx.reLaunch({ url: '/pages/index/index' });
+      } else if (data.type === 'kicked') {
+        // NEW: Handle being kicked by room creator
+        wx.showModal({
+          title: '已被移出',
+          content: data.payload && data.payload.message ? data.payload.message : '你已被房主移出房间',
+          showCancel: false,
+          success: () => {
+            if (app.globalData) {
+              app.globalData.room = null;
+              app.globalData.roomId = null;
+            }
+            // unregister this handler then navigate back
+            if (this._handlerKey && app.globalData && app.globalData.unregisterMessageHandler) {
+              app.globalData.unregisterMessageHandler(this._handlerKey);
+            }
+            wx.reLaunch({ url: '/pages/index/index' });
+          }
+        });
       } else if (data.type === 'game_started') {
         const word = this.data.isSpectator ? '' : data.payload.word;
         wx.navigateTo({ url: `/pages/game/game?word=${word}&isSpectator=${this.data.isSpectator}` });
@@ -99,6 +117,7 @@ Page({
       myNickname: (currentUser && currentUser.nickname) ? currentUser.nickname : (app.globalData.userInfo && app.globalData.userInfo.nickname ? app.globalData.userInfo.nickname : ''),
       creatorId: roomData.creatorId || null,
       isCreator: (roomData.creatorId === (app.globalData.userInfo && app.globalData.userInfo.id)),
+      myId: app.globalData.userInfo && app.globalData.userInfo.id,  // NEW: For kick button visibility
       maxPlayers: roomData.maxPlayers || 4,           // NEW
       undercoverCount: roomData.undercoverCount || 1  // NEW
     });
@@ -115,6 +134,40 @@ Page({
     app.globalData.socket.send({ data: JSON.stringify(msg) });
   },
 
+  // NEW: Kick a player (only for room creator)
+  kickPlayer(e) {
+    const playerIdToKick = e.currentTarget.dataset.playerId;
+    if (!playerIdToKick) {
+      wx.showToast({ title: '无法获取玩家信息', icon: 'none' });
+      return;
+    }
+
+    // Find player name for confirmation
+    const allPlayers = [...this.data.players, ...this.data.spectators];
+    const playerToKick = allPlayers.find(p => p.id === playerIdToKick);
+    const playerName = playerToKick ? playerToKick.nickname : '该玩家';
+
+    wx.showModal({
+      title: '确认踢出',
+      content: `确定要将 ${playerName} 移出房间吗?`,
+      success: (res) => {
+        if (res.confirm) {
+          try {
+            app.globalData.socket.send({
+              data: JSON.stringify({
+                type: 'kick_player',
+                payload: { playerId: playerIdToKick }
+              })
+            });
+          } catch (e) {
+            console.warn('kickPlayer: socket send failed', e);
+            wx.showToast({ title: '踢出失败', icon: 'none' });
+          }
+        }
+      }
+    });
+  },
+
   leaveRoom() {
     // Send leave message to server and navigate back
     try {
@@ -126,6 +179,12 @@ Page({
     this._leaving = true;
     // Clean up local global room state if present
     if (app.globalData) app.globalData.room = null;
+
+    // FIX: Unregister message handler BEFORE navigating
+    if (this._handlerKey && app.globalData && app.globalData.unregisterMessageHandler) {
+      app.globalData.unregisterMessageHandler(this._handlerKey);
+    }
+
     // If there is a previous page in the stack, navigate back; otherwise reLaunch to index
     const pages = getCurrentPages();
     if (pages && pages.length > 1) {

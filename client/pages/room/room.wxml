@@ -11,15 +11,35 @@
   <view class="players-list">
     <view class="list-title">玩家列表 ({{players.length}}/{{maxPlayers || '?'}})</view>
     <view wx:for="{{players}}" wx:key="id" class="player-item {{item.isReady ? 'ready' : ''}}">
-      <text>{{item.nickname}}</text>
-      <text>{{item.isReady ? '已准备' : '未准备'}}</text>
+      <view class="player-info">
+        <text>{{item.nickname}}</text>
+        <text class="status-text">{{item.isReady ? '已准备' : '未准备'}}</text>
+      </view>
+      <!-- NEW: Kick button (only visible to creator, not for self) -->
+      <button wx:if="{{isCreator && item.id !== myId}}" 
+              class="kick-button" 
+              size="mini" 
+              bindtap="kickPlayer" 
+              data-player-id="{{item.id}}">
+        踢出
+      </button>
     </view>
   </view>
 
   <view class="spectators-list" wx:if="{{spectators.length > 0}}">
     <view class="list-title">观众列表 ({{spectators.length}})</view>
     <view wx:for="{{spectators}}" wx:key="id" class="spectator-item">
-      <text>{{item.nickname}}</text>
+      <view class="player-info">
+        <text>{{item.nickname}}</text>
+      </view>
+      <!-- NEW: Kick button for spectators -->
+      <button wx:if="{{isCreator}}" 
+              class="kick-button" 
+              size="mini" 
+              bindtap="kickPlayer" 
+              data-player-id="{{item.id}}">
+        踢出
+      </button>
     </view>
   </view>
 

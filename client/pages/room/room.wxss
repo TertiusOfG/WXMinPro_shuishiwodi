@@ -63,6 +63,41 @@
   font-weight: 500;
 }
 
+/* NEW: Player info container */
+.player-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.status-text {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+/* NEW: Kick button */
+.kick-button {
+  background-color: #FF5252;
+  color: white;
+  border: none;
+  padding: 8rpx 20rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+}
+
+/* NEW: Spectator item */
+.spectator-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28rpx 32rpx;
+  background-color: white;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
 .button {
   width: 100%;
   margin-top: 20rpx;

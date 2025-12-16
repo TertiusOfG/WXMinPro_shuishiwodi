@@ -7,7 +7,11 @@ Page({
         undercoverCount: 1,
         nickname: '',
         minUndercover: 1,
-        maxUndercover: 1
+        maxUndercover: 1,
+        playerCountOptions: [],      // Array of player count options (3-20)
+        playerCountIndex: 1,          // Selected index in playerCountOptions
+        undercoverOptions: [],        // Array of valid undercover counts
+        undercoverIndex: 0            // Selected index in undercoverOptions
     },
 
     onLoad(options) {
@@ -16,8 +20,19 @@ Page({
             this.setData({ nickname: app.globalData.userInfo.nickname });
         }
 
-        // Calculate initial valid range
+        // Initialize player count options (3-20)
+        const playerOptions = [];
+        for (let i = 3; i <= 20; i++) {
+            playerOptions.push(i);
+        }
+        this.setData({ playerCountOptions: playerOptions });
+
+        // Set default to 4 players (index 1 in array [3,4,5...])
+        this.setData({ playerCountIndex: 1 }); // 4 is at index 1
+
+        // Calculate initial valid range and undercover options
         this.updateValidRange(this.data.maxPlayers);
+        this.updateUndercoverOptions(this.data.maxPlayers);
     },
 
     updateValidRange(maxPlayers) {
@@ -26,24 +41,56 @@ Page({
         this.setData({ minUndercover, maxUndercover });
     },
 
-    onMaxPlayersInput(e) {
-        const maxPlayers = parseInt(e.detail.value) || 4;
-        this.setData({ maxPlayers });
-        this.updateValidRange(maxPlayers);
-
-        // Auto-adjust undercover count if it's out of valid range
+    updateUndercoverOptions(maxPlayers) {
         const minUndercover = Math.ceil(maxPlayers / 4);
         const maxUndercover = Math.floor(maxPlayers / 3);
 
+        const options = [];
+        for (let i = minUndercover; i <= maxUndercover; i++) {
+            options.push(i);
+        }
+
+        this.setData({ undercoverOptions: options });
+
+        // Auto-adjust current undercover count if out of range
         if (this.data.undercoverCount < minUndercover) {
-            this.setData({ undercoverCount: minUndercover });
+            this.setData({
+                undercoverCount: minUndercover,
+                undercoverIndex: 0
+            });
         } else if (this.data.undercoverCount > maxUndercover) {
-            this.setData({ undercoverCount: maxUndercover });
+            this.setData({
+                undercoverCount: maxUndercover,
+                undercoverIndex: options.length - 1
+            });
+        } else {
+            // Find current undercover count in new options
+            const index = options.indexOf(this.data.undercoverCount);
+            this.setData({ undercoverIndex: index >= 0 ? index : 0 });
         }
     },
 
-    onUndercoverCountInput(e) {
-        this.setData({ undercoverCount: parseInt(e.detail.value) || 1 });
+    onPlayerCountChange(e) {
+        const index = parseInt(e.detail.value);
+        const maxPlayers = this.data.playerCountOptions[index];
+
+        this.setData({
+            playerCountIndex: index,
+            maxPlayers: maxPlayers
+        });
+
+        this.updateValidRange(maxPlayers);
+        this.updateUndercoverOptions(maxPlayers);
+    },
+
+    onUndercoverChange(e) {
+        const index = parseInt(e.detail.value);
+        const undercoverCount = this.data.undercoverOptions[index];
+
+        this.setData({
+            undercoverIndex: index,
+            undercoverCount: undercoverCount
+        });
     },
 
     onNicknameInput(e) {
@@ -59,8 +106,8 @@ Page({
             return;
         }
 
-        if (maxPlayers < 3) {
-            wx.showToast({ title: '玩家总人数至少需要3人', icon: 'none' });
+        if (maxPlayers < 3 || maxPlayers > 20) {
+            wx.showToast({ title: '玩家总人数必须在3-20之间', icon: 'none' });
             return;
         }
 

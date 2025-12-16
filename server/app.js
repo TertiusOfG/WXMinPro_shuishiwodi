@@ -190,6 +190,12 @@ wss.on('connection', (ws) => {
                     break;
                 }
 
+                // NEW: Validation: maximum 20 players
+                if (maxPlayers > 20) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '玩家总人数最多20人' } }));
+                    break;
+                }
+
                 // NEW: Calculate valid undercover range (1/4 to 1/3 of players)
                 const minUndercover = Math.ceil(maxPlayers / 4);
                 const maxUndercover = Math.floor(maxPlayers / 3);
@@ -327,6 +333,56 @@ wss.on('connection', (ws) => {
                     }
                     playerRoomId = null;
                 }
+                break;
+
+            case 'kick_player':
+                // NEW: Allow room creator to kick a player
+                if (!playerRoomId || !rooms[playerRoomId]) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '房间不存在' } }));
+                    break;
+                }
+
+                const kickRoom = rooms[playerRoomId];
+
+                // Only creator can kick players
+                if (kickRoom.creatorId !== playerId) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '只有房主可以踢出玩家' } }));
+                    break;
+                }
+
+                const playerIdToKick = payload.playerId;
+                if (!playerIdToKick) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '未指定要踢出的玩家' } }));
+                    break;
+                }
+
+                // Cannot kick yourself
+                if (playerIdToKick === playerId) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '不能踢出自己' } }));
+                    break;
+                }
+
+                const kickedPlayer = kickRoom.players.find(p => p.id === playerIdToKick);
+                if (!kickedPlayer) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: '玩家不在房间中' } }));
+                    break;
+                }
+
+                // Notify the kicked player
+                try {
+                    kickedPlayer.ws.send(JSON.stringify({
+                        type: 'kicked',
+                        payload: { message: '你已被房主移出房间' }
+                    }));
+                } catch (e) {
+                    console.error('Failed to notify kicked player:', e);
+                }
+
+                // Remove the player from the room
+                kickRoom.players = kickRoom.players.filter(p => p.id !== playerIdToKick);
+
+                // Broadcast updated room state
+                broadcastRoomState(playerRoomId);
                 break;
 
             case 'player_ready':

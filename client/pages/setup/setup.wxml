@@ -5,12 +5,16 @@
   <view class="config-section">
     <view class="config-item">
       <text class="config-label">玩家总人数</text>
-      <input class="config-input" type="number" value="{{maxPlayers}}" bindinput="onMaxPlayersInput" />
+      <picker class="config-picker" mode="selector" range="{{playerCountOptions}}" value="{{playerCountIndex}}" bindchange="onPlayerCountChange">
+        <view class="picker-display">{{maxPlayers}}</view>
+      </picker>
     </view>
 
     <view class="config-item">
       <text class="config-label">卧底人数</text>
-      <input class="config-input" type="number" value="{{undercoverCount}}" bindinput="onUndercoverCountInput" />
+      <picker class="config-picker" mode="selector" range="{{undercoverOptions}}" value="{{undercoverIndex}}" bindchange="onUndercoverChange">
+        <view class="picker-display">{{undercoverCount}}</view>
+      </picker>
     </view>
     
     <!-- NEW: Hint text for valid range -->
