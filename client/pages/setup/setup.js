@@ -6,6 +6,7 @@ Page({
         maxPlayers: 4,
         undercoverCount: 1,
         nickname: '',
+        avatarUrl: '',  // NEW: User avatar URL
         minUndercover: 1,
         maxUndercover: 1,
         playerCountOptions: [],      // Array of player count options (3-20)
@@ -15,10 +16,23 @@ Page({
     },
 
     onLoad(options) {
-        // Pre-fill nickname if available from global data
-        if (app.globalData && app.globalData.userInfo && app.globalData.userInfo.nickname) {
-            this.setData({ nickname: app.globalData.userInfo.nickname });
+        // NEW: Load user profile from storage or app global data
+        const storedUserInfo = wx.getStorageSync('userInfo');
+        let defaultNickname = '';
+        let defaultAvatar = '';
+
+        if (storedUserInfo && storedUserInfo.nickname) {
+            defaultNickname = storedUserInfo.nickname;
+            defaultAvatar = storedUserInfo.avatarUrl || '';
+        } else if (app.globalData && app.globalData.userInfo && app.globalData.userInfo.nickname) {
+            defaultNickname = app.globalData.userInfo.nickname;
+            defaultAvatar = app.globalData.userInfo.avatarUrl || '';
         }
+
+        this.setData({
+            nickname: defaultNickname,
+            avatarUrl: defaultAvatar
+        });
 
         // Initialize player count options (3-20)
         const playerOptions = [];
@@ -140,7 +154,34 @@ Page({
     },
 
     onNicknameInput(e) {
-        this.setData({ nickname: e.detail.value });
+        const nickname = e.detail.value;
+        this.setData({ nickname });
+
+        // Save to storage
+        const userInfo = wx.getStorageSync('userInfo') || {};
+        userInfo.nickname = nickname;
+        wx.setStorageSync('userInfo', userInfo);
+
+        // Update global data
+        if (app.globalData && app.globalData.userInfo) {
+            app.globalData.userInfo.nickname = nickname;
+        }
+    },
+
+    // NEW: Handle avatar selection
+    onChooseAvatar(e) {
+        const { avatarUrl } = e.detail;
+        this.setData({ avatarUrl });
+
+        // Save to storage
+        const userInfo = wx.getStorageSync('userInfo') || {};
+        userInfo.avatarUrl = avatarUrl;
+        wx.setStorageSync('userInfo', userInfo);
+
+        // Update global data
+        if (app.globalData && app.globalData.userInfo) {
+            app.globalData.userInfo.avatarUrl = avatarUrl;
+        }
     },
 
     createGame() {

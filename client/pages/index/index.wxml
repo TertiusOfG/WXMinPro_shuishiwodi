@@ -14,15 +14,21 @@
   <view class="modal-content" catchtap="stopPropagation">
     <view class="modal-title">加入房间</view>
     
-    <input class="modal-input" placeholder="输入昵称" bindinput="onNicknameInput" value="{{nickname}}" />
+    <!-- NEW: Profile section with avatar and nickname -->
+    <view class="modal-profile-section">
+      <button class="modal-avatar-button" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image class="modal-avatar" src="{{avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      </button>
+      <input class="modal-input" type="nickname" placeholder="输入昵称" bindinput="onNicknameInput" value="{{nickname}}" />
+    </view>
+    
     <input class="modal-input" placeholder="输入房间号" bindinput="onRoomIdInput" value="{{roomId}}" />
     
-    <checkbox-group bindchange="onSpectatorChange">
-      <label class="checkbox-label">
-        <checkbox value="true"/><text>以观众身份加入</text>
-      </label>
-    </checkbox-group>
-
+    <view class="checkbox-label">
+      <checkbox value="true" checked="{{isSpectator}}" bindchange="onSpectatorChange" />
+      <text>以观众身份加入</text>
+    </view>
+    
     <view class="modal-buttons">
       <button class="modal-button cancel-button" bindtap="hideJoinModal">取消</button>
       <button class="modal-button confirm-button" type="primary" bindtap="joinRoom">确定</button>

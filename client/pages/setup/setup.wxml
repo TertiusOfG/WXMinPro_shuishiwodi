@@ -23,7 +23,13 @@
     </view>
   </view>
 
-  <input class="nickname-input" placeholder="输入昵称" bindinput="onNicknameInput" value="{{nickname}}" />
+  <!-- NEW: User profile section with avatar and nickname -->
+  <view class="profile-section">
+    <button class="avatar-button" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image class="avatar" src="{{avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+    </button>
+    <input class="nickname-input" type="nickname" placeholder="输入昵称" bindinput="onNicknameInput" value="{{nickname}}" />
+  </view>
 
   <button class="start-button" type="primary" bindtap="createGame">开 局</button>
 </view>

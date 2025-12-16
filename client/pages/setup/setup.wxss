@@ -64,13 +64,43 @@
   margin-bottom: 20rpx;
 }
 
-.nickname-input {
+/* NEW: Profile section with avatar and nickname */
+.profile-section {
+  display: flex;
+  align-items: center;
   width: 80%;
+  margin-bottom: 60rpx;
+  gap: 20rpx;
+}
+
+.avatar-button {
+  width: 88rpx;
+  height: 88rpx;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar-button::after {
+  border: none;
+}
+
+.avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  border: 2rpx solid #E0E0E0;
+}
+
+.nickname-input {
+  flex: 1;
   height: 88rpx;
   border: 2rpx solid #E0E0E0;
   border-radius: 44rpx;
   padding: 0 32rpx;
-  margin-bottom: 60rpx;
   background-color: white;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
   font-size: 30rpx;

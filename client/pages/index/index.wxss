@@ -62,8 +62,40 @@
   font-size: 40rpx;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 48rpx;
+  margin-bottom: 32rpx;
   color: #F9A825;
+}
+
+/* NEW: Modal profile section with avatar */
+.modal-profile-section {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 28rpx;
+  gap: 16rpx;
+}
+
+.modal-avatar-button {
+  width: 80rpx;
+  height: 80rpx;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.modal-avatar-button::after {
+  border: none;
+}
+
+.modal-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  border: 2rpx solid #E0E0E0;
 }
 
 .modal-input {
@@ -75,6 +107,12 @@
   margin-bottom: 28rpx;
   background-color: #FAFAFA;
   font-size: 28rpx;
+}
+
+/* Adjust input in profile section */
+.modal-profile-section .modal-input {
+  flex: 1;
+  margin-bottom: 0;
 }
 
 .checkbox-label {

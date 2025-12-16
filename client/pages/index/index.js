@@ -6,10 +6,20 @@ Page({
     nickname: '',
     roomId: '',
     isSpectator: false,
-    showModal: false  // NEW: Control join modal visibility
+    showModal: false,  // Control join modal visibility
+    avatarUrl: ''      // NEW: User avatar URL
   },
 
   onLoad(options) {
+    // NEW: Load user profile from storage
+    const storedUserInfo = wx.getStorageSync('userInfo');
+    if (storedUserInfo) {
+      this.setData({
+        nickname: storedUserInfo.nickname || '',
+        avatarUrl: storedUserInfo.avatarUrl || ''
+      });
+    }
+
     // If opened via share link, prefill roomId and show modal
     if (options && options.roomId) {
       this.setData({ roomId: options.roomId, showModal: true });
@@ -193,7 +203,34 @@ Page({
   },
 
   onNicknameInput(e) {
-    this.setData({ nickname: e.detail.value });
+    const nickname = e.detail.value;
+    this.setData({ nickname });
+
+    // Save to storage
+    const userInfo = wx.getStorageSync('userInfo') || {};
+    userInfo.nickname = nickname;
+    wx.setStorageSync('userInfo', userInfo);
+
+    // Update global data
+    if (app.globalData && app.globalData.userInfo) {
+      app.globalData.userInfo.nickname = nickname;
+    }
+  },
+
+  // NEW: Handle avatar selection
+  onChooseAvatar(e) {
+    const { avatarUrl } = e.detail;
+    this.setData({ avatarUrl });
+
+    // Save to storage
+    const userInfo = wx.getStorageSync('userInfo') || {};
+    userInfo.avatarUrl = avatarUrl;
+    wx.setStorageSync('userInfo', userInfo);
+
+    // Update global data
+    if (app.globalData && app.globalData.userInfo) {
+      app.globalData.userInfo.avatarUrl = avatarUrl;
+    }
   },
 
   onRoomIdInput(e) {
