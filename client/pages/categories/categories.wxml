@@ -1,16 +1,16 @@
-<!--pages/categories/categories.wxml-->;
-<view class="container">;
-  <view class="title">;词汇列表</view>;
+<!--pages/categories/categories.wxml-->
+<view class="container">
+  <view class="title">词汇列表</view>
   
-  <view class="notice">;
-    <text>;游戏时将从以下词汇中随机选择</text>;
-  </view>;
+  <view class="notice">
+    <text>游戏时将从以下词汇中随机选择</text>
+  </view>
 
-  <view class="categories-list">;
-    <view wx:for="{{wordPairs}}" wx:key="index" class="word-pair-item">;
-      <view class="word civilian-word">;{{item.civilian}}</view>;
-      <view class="arrow">;↔</view>;
-      <view class="word undercover-word">;{{item.undercover}}</view>;
-    </view>;
-  </view>;
-</view>;
+  <view class="categories-list">
+    <view wx:for="{{wordPairs}}" wx:key="index" class="word-pair-item">
+      <view class="word civilian-word">{{item.civilian}}</view>
+      <view class="arrow">↔</view>
+      <view class="word undercover-word">{{item.undercover}}</view>
+    </view>
+  </view>
+</view>
