@@ -48,6 +48,15 @@
   background-color: #FAFAFA;
 }
 
+/* NEW: Hint text for valid range */
+.hint-text {
+  text-align: center;
+  font-size: 24rpx;
+  color: #4FC3F7; /* Heavenly Blue */
+  margin-top: -12rpx;
+  margin-bottom: 20rpx;
+}
+
 .nickname-input {
   width: 80%;
   height: 88rpx;

@@ -184,21 +184,19 @@ wss.on('connection', (ws) => {
                 const maxPlayers = parseInt(payload.maxPlayers) || 4;
                 const undercoverCount = parseInt(payload.undercoverCount) || 1;
 
-                // Validation: undercover count must be less than max players
-                if (undercoverCount >= maxPlayers) {
-                    ws.send(JSON.stringify({ type: 'error', payload: { message: '卧底人数必须少于玩家总人数' } }));
-                    break;
-                }
-
                 // Validation: minimum 3 players
                 if (maxPlayers < 3) {
                     ws.send(JSON.stringify({ type: 'error', payload: { message: '玩家总人数至少需要3人' } }));
                     break;
                 }
 
-                // Validation: at least 1 undercover
-                if (undercoverCount < 1) {
-                    ws.send(JSON.stringify({ type: 'error', payload: { message: '卧底人数至少需要1人' } }));
+                // NEW: Calculate valid undercover range (1/4 to 1/3 of players)
+                const minUndercover = Math.ceil(maxPlayers / 4);
+                const maxUndercover = Math.floor(maxPlayers / 3);
+
+                // Validation: undercover count must be within valid range
+                if (undercoverCount < minUndercover || undercoverCount > maxUndercover) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: `卧底人数必须在${minUndercover}到${maxUndercover}之间` } }));
                     break;
                 }
 

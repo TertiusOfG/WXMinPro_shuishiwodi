@@ -5,7 +5,9 @@ Page({
     data: {
         maxPlayers: 4,
         undercoverCount: 1,
-        nickname: ''
+        nickname: '',
+        minUndercover: 1,
+        maxUndercover: 1
     },
 
     onLoad(options) {
@@ -13,10 +15,31 @@ Page({
         if (app.globalData && app.globalData.userInfo && app.globalData.userInfo.nickname) {
             this.setData({ nickname: app.globalData.userInfo.nickname });
         }
+
+        // Calculate initial valid range
+        this.updateValidRange(this.data.maxPlayers);
+    },
+
+    updateValidRange(maxPlayers) {
+        const minUndercover = Math.ceil(maxPlayers / 4);
+        const maxUndercover = Math.floor(maxPlayers / 3);
+        this.setData({ minUndercover, maxUndercover });
     },
 
     onMaxPlayersInput(e) {
-        this.setData({ maxPlayers: parseInt(e.detail.value) || 4 });
+        const maxPlayers = parseInt(e.detail.value) || 4;
+        this.setData({ maxPlayers });
+        this.updateValidRange(maxPlayers);
+
+        // Auto-adjust undercover count if it's out of valid range
+        const minUndercover = Math.ceil(maxPlayers / 4);
+        const maxUndercover = Math.floor(maxPlayers / 3);
+
+        if (this.data.undercoverCount < minUndercover) {
+            this.setData({ undercoverCount: minUndercover });
+        } else if (this.data.undercoverCount > maxUndercover) {
+            this.setData({ undercoverCount: maxUndercover });
+        }
     },
 
     onUndercoverCountInput(e) {
@@ -41,13 +64,16 @@ Page({
             return;
         }
 
-        if (undercoverCount < 1) {
-            wx.showToast({ title: '卧底人数至少需要1人', icon: 'none' });
-            return;
-        }
+        // Calculate valid undercover range
+        const minUndercover = Math.ceil(maxPlayers / 4);
+        const maxUndercover = Math.floor(maxPlayers / 3);
 
-        if (undercoverCount >= maxPlayers) {
-            wx.showToast({ title: '卧底人数必须少于玩家总人数', icon: 'none' });
+        if (undercoverCount < minUndercover || undercoverCount > maxUndercover) {
+            wx.showToast({
+                title: `卧底人数必须在${minUndercover}到${maxUndercover}之间`,
+                icon: 'none',
+                duration: 2500
+            });
             return;
         }
 

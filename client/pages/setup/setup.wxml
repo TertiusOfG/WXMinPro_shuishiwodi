@@ -12,6 +12,11 @@
       <text class="config-label">卧底人数</text>
       <input class="config-input" type="number" value="{{undercoverCount}}" bindinput="onUndercoverCountInput" />
     </view>
+    
+    <!-- NEW: Hint text for valid range -->
+    <view class="hint-text">
+      <text>卧底人数范围: {{minUndercover}}-{{maxUndercover}}</text>
+    </view>
   </view>
 
   <input class="nickname-input" placeholder="输入昵称" bindinput="onNicknameInput" value="{{nickname}}" />
