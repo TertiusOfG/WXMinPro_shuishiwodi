@@ -52,7 +52,7 @@ Page({
     }
 
     // register message handler
-    this._handlerKey = `game_${Math.random().toString(36).substring(2,8)}`;
+    this._handlerKey = `game_${Math.random().toString(36).substring(2, 8)}`;
     if (app.globalData && app.globalData.registerMessageHandler) {
       app.globalData.registerMessageHandler(this._handlerKey, (res) => {
         const data = JSON.parse(res.data);
@@ -160,8 +160,25 @@ Page({
   },
 
   submitSpeech() {
-    if (!this.data.speechInput.trim()) { wx.showToast({ title: '发言不能为空', icon: 'none' }); return; }
-    app.globalData.socket.send({ data: JSON.stringify({ type: 'player_action', payload: { action: 'speak', message: this.data.speechInput } }) });
+    const msg = this.data.speechInput.trim();
+    if (!msg) {
+      wx.showToast({ title: '请输入发言内容', icon: 'none' });
+      return;
+    }
+
+    // Get avatar URL from storage
+    const storedUserInfo = wx.getStorageSync('userInfo');
+    const avatarUrl = storedUserInfo && storedUserInfo.avatarUrl ? storedUserInfo.avatarUrl : '';
+
+    const payload = {
+      type: 'player_action',
+      payload: {
+        action: 'speak',
+        message: msg,
+        avatarUrl: avatarUrl  // NEW: Include avatar URL
+      }
+    };
+    app.globalData.socket.send({ data: JSON.stringify(payload) });
     this.setData({ speechInput: '' });
   },
 
@@ -193,15 +210,17 @@ Page({
 
   endGame() {
     if (!this.data.isCreator) return;
-    wx.showModal({ title: '确认', content: '确定要结束当前游戏吗？', success: (res) => {
-      if (res.confirm) {
-        try {
-          app.globalData.socket.send({ data: JSON.stringify({ type: 'end_game' }) });
-        } catch (e) {
-          wx.showToast({ title: '无法发送结束命令', icon: 'none' });
+    wx.showModal({
+      title: '确认', content: '确定要结束当前游戏吗？', success: (res) => {
+        if (res.confirm) {
+          try {
+            app.globalData.socket.send({ data: JSON.stringify({ type: 'end_game' }) });
+          } catch (e) {
+            wx.showToast({ title: '无法发送结束命令', icon: 'none' });
+          }
         }
       }
-    }});
+    });
   },
 
   onUnload() {

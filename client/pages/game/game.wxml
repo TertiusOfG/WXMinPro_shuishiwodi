@@ -11,10 +11,16 @@
 
   <scroll-view class="speeches-area" scroll-y="true" scroll-into-view="{{toView}}">
     <view wx:for="{{speeches}}" wx:key="index" id="speech-{{index}}" class="speech-row {{item.playerId === myId ? 'my-speech-row' : 'other-speech-row'}}">
+      <!-- NEW: Avatar for other players (left side) -->
+      <image wx:if="{{item.playerId !== myId}}" class="speech-avatar" src="{{item.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      
       <view class="speech-bubble {{item.playerId === myId ? 'my-speech-bubble' : 'other-speech-bubble'}}">
         <text class="speech-nickname">{{item.nickname}}</text>
         <text class="speech-message">{{item.message}}</text>
       </view>
+      
+      <!-- NEW: Avatar for my messages (right side) -->
+      <image wx:if="{{item.playerId === myId}}" class="speech-avatar" src="{{item.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
     </view>
   </scroll-view>
 

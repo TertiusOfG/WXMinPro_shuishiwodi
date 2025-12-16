@@ -482,7 +482,13 @@ wss.on('connection', (ws) => {
                 }
 
                 if (action === 'speak' && actionRoom.gamePlayerIds[actionRoom.turnIndex] === playerId) {
-                    const speech = { playerId, nickname: actingPlayer.nickname, message };
+                    // NEW: Include avatarUrl from payload
+                    const speech = {
+                        playerId,
+                        nickname: actingPlayer.nickname,
+                        message,
+                        avatarUrl: payload.avatarUrl || ''  // NEW: Include avatar URL
+                    };
                     actionRoom.speeches.push(speech);
 
                     actionRoom.players.forEach(p => p.ws.send(JSON.stringify({ type: 'new_speech', payload: speech })));

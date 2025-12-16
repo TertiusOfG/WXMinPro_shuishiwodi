@@ -115,7 +115,18 @@
 
 .speech-row {
   display: flex;
+  align-items: flex-start;  /* Align items to top */
   margin-bottom: 24rpx;
+  gap: 12rpx;  /* Space between avatar and bubble */
+}
+
+/* NEW: Avatar styles */
+.speech-avatar {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  border: 2rpx solid #E0E0E0;
+  flex-shrink: 0;  /* Prevent avatar from shrinking */
 }
 
 .my-speech-row {
