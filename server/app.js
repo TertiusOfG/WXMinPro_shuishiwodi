@@ -217,7 +217,16 @@ wss.on('connection', (ws) => {
                     gameState: 'waiting',
                 };
                 playerRoomId = roomId;
-                ws.send(JSON.stringify({ type: 'room_created', payload: { roomId } }));
+
+                // FIX: Include room config in response so room page can display it immediately
+                ws.send(JSON.stringify({
+                    type: 'room_created',
+                    payload: {
+                        roomId,
+                        maxPlayers: maxPlayers,
+                        undercoverCount: undercoverCount
+                    }
+                }));
                 broadcastRoomState(roomId);
                 break;
 

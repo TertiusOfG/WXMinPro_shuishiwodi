@@ -47,6 +47,14 @@ Page({
           app.globalData.userInfo.id = data.payload.id;
         } else if (data.type === 'room_created') {
           app.globalData.roomId = data.payload.roomId;
+
+          // FIX: Store room config immediately so room page can display it
+          app.globalData.room = {
+            roomId: data.payload.roomId,
+            maxPlayers: data.payload.maxPlayers,
+            undercoverCount: data.payload.undercoverCount
+          };
+
           // unregister index handler before navigating so it doesn't handle future messages
           if (app.globalData && app.globalData.unregisterMessageHandler) {
             app.globalData.unregisterMessageHandler('index');
