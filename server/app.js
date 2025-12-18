@@ -8,7 +8,22 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 // Load words from JSON file
-const words = JSON.parse(fs.readFileSync('words.json', 'utf8'));
+const wordsData = JSON.parse(fs.readFileSync('words.json', 'utf8'));
+// Flatten all word pairs from all categories into a single array
+const words = wordsData.categories.flatMap(category => category.words);
+
+// Middleware to parse JSON and enable CORS
+app.use(express.json());
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
+
+// HTTP endpoint to get words data
+app.get('/api/words', (req, res) => {
+    res.json(wordsData);
+});
 
 // In-memory store for rooms and players
 const rooms = {};

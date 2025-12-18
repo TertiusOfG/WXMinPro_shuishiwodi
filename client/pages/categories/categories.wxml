@@ -7,10 +7,15 @@
   </view>
 
   <view class="categories-list">
-    <view wx:for="{{wordPairs}}" wx:key="index" class="word-pair-item">
-      <view class="word civilian-word">{{item.civilian}}</view>
-      <view class="arrow">↔</view>
-      <view class="word undercover-word">{{item.undercover}}</view>
-    </view>
+    <block wx:for="{{categories}}" wx:key="name" wx:for-item="category">
+      <view class="category-section">
+        <view class="category-name">{{category.name}}</view>
+        <view wx:for="{{category.words}}" wx:key="index" class="word-pair-item">
+          <view class="word civilian-word">{{item.civilian}}</view>
+          <view class="arrow">↔</view>
+          <view class="word undercover-word">{{item.undercover}}</view>
+        </view>
+      </view>
+    </block>
   </view>
 </view>
