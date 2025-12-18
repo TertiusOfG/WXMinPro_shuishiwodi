@@ -7,13 +7,19 @@
   </view>
 
   <view class="categories-list">
-    <block wx:for="{{categories}}" wx:key="name" wx:for-item="category">
+    <block wx:for="{{categories}}" wx:key="name" wx:for-item="category" wx:for-index="idx">
       <view class="category-section">
-        <view class="category-name">{{category.name}}</view>
-        <view wx:for="{{category.words}}" wx:key="index" class="word-pair-item">
-          <view class="word civilian-word">{{item.civilian}}</view>
-          <view class="arrow">↔</view>
-          <view class="word undercover-word">{{item.undercover}}</view>
+        <view class="category-header" bindtap="toggleCategory" data-index="{{idx}}">
+          <view class="category-name">{{category.name}}</view>
+          <view class="category-count">({{category.words.length}}组)</view>
+          <view class="chevron {{category.expanded ? 'expanded' : ''}}">▼</view>
+        </view>
+        <view class="category-content {{category.expanded ? 'expanded' : 'collapsed'}}">
+          <view wx:for="{{category.words}}" wx:key="index" class="word-pair-item">
+            <view class="word civilian-word">{{item.civilian}}</view>
+            <view class="arrow">↔</view>
+            <view class="word undercover-word">{{item.undercover}}</view>
+          </view>
         </view>
       </view>
     </block>

@@ -221,6 +221,9 @@ wss.on('connection', (ws) => {
                     break;
                 }
 
+                // Get selected category (default to '全部')
+                const selectedCategory = payload.selectedCategory || '全部';
+
                 const roomId = generateRoomId();
                 rooms[roomId] = {
                     id: roomId,
@@ -228,6 +231,7 @@ wss.on('connection', (ws) => {
                     creatorId: playerId,
                     maxPlayers: maxPlayers,           // NEW
                     undercoverCount: undercoverCount, // NEW
+                    selectedCategory: selectedCategory, // NEW: Store selected category
                     players: [{ id: playerId, nickname: creatorNick, isReady: false, ws, isSpectator: false }],
                     gameState: 'waiting',
                 };
@@ -447,7 +451,23 @@ wss.on('connection', (ws) => {
                     gameRoom.votes = {};
                     gameRoom.speeches = [];
 
-                    const wordPair = words[Math.floor(Math.random() * words.length)];
+                    // Filter words by selected category
+                    const selectedCategory = gameRoom.selectedCategory || '全部';
+                    let availableWords = words; // default: all words
+
+                    if (selectedCategory !== '全部') {
+                        const category = wordsData.categories.find(cat => cat.name === selectedCategory);
+                        if (!category || !category.words || category.words.length === 0) {
+                            ws.send(JSON.stringify({
+                                type: 'error',
+                                payload: { message: `类别"${selectedCategory}"没有可用的词汇` }
+                            }));
+                            break;
+                        }
+                        availableWords = category.words;
+                    }
+
+                    const wordPair = availableWords[Math.floor(Math.random() * availableWords.length)];
 
                     // NEW: Randomly select multiple undercovers
                     const undercoverIndices = [];

@@ -12,7 +12,11 @@ Page({
         playerCountOptions: [],      // Array of player count options (3-20)
         playerCountIndex: 1,          // Selected index in playerCountOptions
         undercoverOptions: [],        // Array of valid undercover counts
-        undercoverIndex: 0            // Selected index in undercoverOptions
+        undercoverIndex: 0,           // Selected index in undercoverOptions
+        categories: [],               // Array of category objects from server
+        categoryNames: ['全部'],      // Array of category names for picker
+        categoryIndex: 0,             // Selected index in categoryNames
+        selectedCategory: '全部'      // Selected category name
     },
 
     onLoad(options) {
@@ -47,6 +51,9 @@ Page({
         // Calculate initial valid range and undercover options
         this.updateValidRange(this.data.maxPlayers);
         this.updateUndercoverOptions(this.data.maxPlayers);
+
+        // Load categories from server
+        this.loadCategories();
 
         // FIX: Register message handler to receive room_created response
         this._handlerKey = `setup_${Math.random().toString(36).substring(2, 8)}`;
@@ -153,6 +160,38 @@ Page({
         });
     },
 
+    loadCategories() {
+        // Fetch categories from server
+        wx.request({
+            url: 'http://localhost:8080/api/words',
+            method: 'GET',
+            success: (res) => {
+                if (res.statusCode === 200 && res.data.categories) {
+                    const categories = res.data.categories;
+                    const categoryNames = ['全部', ...categories.map(cat => cat.name)];
+                    this.setData({
+                        categories,
+                        categoryNames
+                    });
+                }
+            },
+            fail: (err) => {
+                console.error('Failed to load categories:', err);
+                // Keep default '全部' option on failure
+            }
+        });
+    },
+
+    onCategoryChange(e) {
+        const index = parseInt(e.detail.value);
+        const selectedCategory = this.data.categoryNames[index];
+
+        this.setData({
+            categoryIndex: index,
+            selectedCategory: selectedCategory
+        });
+    },
+
     onNicknameInput(e) {
         const nickname = e.detail.value;
         this.setData({ nickname });
@@ -220,7 +259,8 @@ Page({
             payload: {
                 nickname: nickname.trim(),
                 maxPlayers: maxPlayers,
-                undercoverCount: undercoverCount
+                undercoverCount: undercoverCount,
+                selectedCategory: this.data.selectedCategory
             }
         };
 

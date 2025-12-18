@@ -17,7 +17,12 @@ Page({
             method: 'GET',
             success: (res) => {
                 if (res.statusCode === 200 && res.data.categories) {
-                    this.setData({ categories: res.data.categories });
+                    // Add expanded property to each category (default: false = collapsed)
+                    const categories = res.data.categories.map(cat => ({
+                        ...cat,
+                        expanded: false
+                    }));
+                    this.setData({ categories });
                 } else {
                     wx.showToast({
                         title: '加载词汇失败',
@@ -35,6 +40,7 @@ Page({
                 const categories = [
                     {
                         name: '食物饮料',
+                        expanded: false,
                         words: [
                             { civilian: '牛奶', undercover: '豆浆' },
                             { civilian: '可乐', undercover: '雪碧' },
@@ -43,6 +49,7 @@ Page({
                     },
                     {
                         name: '日常用品',
+                        expanded: false,
                         words: [
                             { civilian: '牙刷', undercover: '梳子' },
                             { civilian: '手机', undercover: '充电宝' },
@@ -51,12 +58,14 @@ Page({
                     },
                     {
                         name: '运动',
+                        expanded: false,
                         words: [
                             { civilian: '篮球', undercover: '足球' }
                         ]
                     },
                     {
                         name: '自然',
+                        expanded: false,
                         words: [
                             { civilian: '夏天', undercover: '秋天' },
                             { civilian: '太阳', undercover: '月亮' }
@@ -64,6 +73,7 @@ Page({
                     },
                     {
                         name: '人物',
+                        expanded: false,
                         words: [
                             { civilian: '老师', undercover: '学生' }
                         ]
@@ -71,6 +81,15 @@ Page({
                 ];
                 this.setData({ categories });
             }
+        });
+    },
+
+    // Toggle category expand/collapse
+    toggleCategory(e) {
+        const index = e.currentTarget.dataset.index;
+        const key = `categories[${index}].expanded`;
+        this.setData({
+            [key]: !this.data.categories[index].expanded
         });
     }
 });

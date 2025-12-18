@@ -16,6 +16,13 @@
         <view class="picker-display">{{undercoverCount}}</view>
       </picker>
     </view>
+
+    <view class="config-item">
+      <text class="config-label">词汇类别</text>
+      <picker class="config-picker" mode="selector" range="{{categoryNames}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+        <view class="picker-display">{{selectedCategory}}</view>
+      </picker>
+    </view>
     
     <!-- NEW: Hint text for valid range -->
     <view class="hint-text">
