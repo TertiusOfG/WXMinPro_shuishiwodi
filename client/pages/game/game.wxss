@@ -55,17 +55,50 @@
   border-radius: 50%; /* Make it a circle */
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end; /* Align content to bottom for overlay */
   align-items: center;
   text-align: center;
   transition: all 0.3s ease;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
   border: 3rpx solid #E0E0E0;
+  overflow: hidden; /* Ensure avatar doesn't overflow circle */
+}
+
+.player-avatar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.player-nickname-overlay {
+  position: relative;
+  width: 100%;
+  padding: 8rpx 4rpx;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+  border-radius: 0 0 75rpx 75rpx; /* Match bottom half of circle */
+  z-index: 1;
 }
 
 .player-nickname {
-  font-size: 28rpx;
-  color: #333;
+  font-size: 24rpx;
+  color: white;
+  font-weight: 500;
+  text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 4rpx;
+}
+
+.player-status {
+  font-size: 20rpx;
+  color: #FFB74D;
+  font-weight: 600;
+  text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.5);
 }
 
 .action-area {
@@ -77,10 +110,12 @@
 }
 
 .player-card.eliminated {
-  background-color: #E0E0E0;
-  color: #999;
   opacity: 0.4;
   border-color: #BDBDBD;
+}
+
+.player-card.eliminated .player-avatar {
+  filter: grayscale(100%);
 }
 
 .voting-active .player-card:not(.eliminated) {
@@ -98,7 +133,6 @@
   transform: scale(1.15);
   box-shadow: 0 0 24rpx rgba(249, 168, 37, 0.7);
   border: 4rpx solid #F9A825;
-  background: linear-gradient(135deg, #FFF9E6 0%, white 100%);
 }
 
 /* --- Speeches Area --- */

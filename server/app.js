@@ -55,7 +55,7 @@ const broadcastRoomState = (roomId) => {
             creatorId: room.creatorId,
             maxPlayers: room.maxPlayers || 4,           // NEW
             undercoverCount: room.undercoverCount || 1, // NEW
-            players: room.players.map(p => ({ id: p.id, nickname: p.nickname, isReady: p.isReady, isSpectator: p.isSpectator })),
+            players: room.players.map(p => ({ id: p.id, nickname: p.nickname, isReady: p.isReady, isSpectator: p.isSpectator, avatarUrl: p.avatarUrl || '' })),
             gameState: room.gameState,
             currentPlayerId: (room.gamePlayerIds && typeof room.turnIndex === 'number') ? room.gamePlayerIds[room.turnIndex] : null,
         }
@@ -232,7 +232,7 @@ wss.on('connection', (ws) => {
                     maxPlayers: maxPlayers,           // NEW
                     undercoverCount: undercoverCount, // NEW
                     selectedCategory: selectedCategory, // NEW: Store selected category
-                    players: [{ id: playerId, nickname: creatorNick, isReady: false, ws, isSpectator: false }],
+                    players: [{ id: playerId, nickname: creatorNick, isReady: false, ws, isSpectator: false, avatarUrl: payload.avatarUrl || '' }],
                     gameState: 'waiting',
                 };
                 playerRoomId = roomId;
@@ -279,7 +279,7 @@ wss.on('connection', (ws) => {
                         return;
                     }
 
-                    roomToJoin.players.push({ id: playerId, nickname: joinNick, isReady: false, ws, isSpectator });
+                    roomToJoin.players.push({ id: playerId, nickname: joinNick, isReady: false, ws, isSpectator, avatarUrl: payload.avatarUrl || '' });
                     playerRoomId = payload.roomId;
                     broadcastRoomState(payload.roomId);
 

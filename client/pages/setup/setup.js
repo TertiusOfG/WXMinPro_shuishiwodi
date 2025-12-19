@@ -260,7 +260,8 @@ Page({
                 nickname: nickname.trim(),
                 maxPlayers: maxPlayers,
                 undercoverCount: undercoverCount,
-                selectedCategory: this.data.selectedCategory
+                selectedCategory: this.data.selectedCategory,
+                avatarUrl: this.data.avatarUrl || ''
             }
         };
 

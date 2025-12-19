@@ -255,7 +255,8 @@ Page({
       payload: {
         nickname: this.data.nickname,
         roomId: this.data.roomId,
-        isSpectator: this.data.isSpectator
+        isSpectator: this.data.isSpectator,
+        avatarUrl: this.data.avatarUrl || ''
       }
     };
     app.globalData.socket.send({ data: JSON.stringify(msg) });
