@@ -44,7 +44,9 @@ Page({
         isMyTurn: payloadCurrent === myId,
         gameState: room.gameState || this.data.gameState,
         creatorId: room.creatorId || null,
-        isCreator: (room.creatorId === myId)
+        isCreator: (room.creatorId === myId),
+        showCategory: room.showCategory || false,
+        selectedCategory: room.selectedCategory || ''
       }, () => {
         this.updateCurrentPlayerNickname();
       });
