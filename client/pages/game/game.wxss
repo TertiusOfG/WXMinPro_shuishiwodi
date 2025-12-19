@@ -9,6 +9,7 @@
 }
 
 .word-display-area {
+  position: relative;
   width: 90%;
   padding: 48rpx;
   margin-bottom: 40rpx;
@@ -31,6 +32,22 @@
   font-weight: bold;
   color: #5D4037;
   letter-spacing: 4rpx;
+}
+
+.category-display {
+  position: absolute;
+  top: 16rpx;
+  left: 16rpx;
+  padding: 8rpx 16rpx;
+  background-color: rgba(249, 168, 37, 0.15);
+  border-radius: 8rpx;
+  border: 1rpx solid rgba(249, 168, 37, 0.3);
+}
+
+.category-label {
+  font-size: 22rpx;
+  color: #F9A825;
+  font-weight: 600;
 }
 
 .game-status {

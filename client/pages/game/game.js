@@ -20,7 +20,9 @@ Page({
     // new fields
     isCreator: false,
     creatorId: null,
-    voteProgress: ''
+    voteProgress: '',
+    showCategory: false,
+    selectedCategory: ''
   },
 
   onLoad(options) {
@@ -77,7 +79,9 @@ Page({
               currentPlayerId: payloadCurrent,
               isMyTurn: payloadCurrent === myId,
               creatorId: data.payload.creatorId || null,
-              isCreator: (data.payload.creatorId === myId)
+              isCreator: (data.payload.creatorId === myId),
+              showCategory: data.payload.showCategory || false,
+              selectedCategory: data.payload.selectedCategory || ''
             }, () => {
               this.updateCurrentPlayerNickname();
             });

@@ -1,6 +1,9 @@
 <!--pages/game/game.wxml-->
 <view class="container">
   <view class="word-display-area" wx:if="{{!isSpectator}}">
+    <view class="category-display" wx:if="{{showCategory && selectedCategory && selectedCategory !== '全部'}}">
+      <text class="category-label">类别：{{selectedCategory}}</text>
+    </view>
     <view class="current-player" wx:if="{{myNickname}}">你的昵称：<text class="current-player-nick">{{myNickname}}</text></view>
     <view class="word-label">你的词语</view>
     <view class="word">{{word}}</view>

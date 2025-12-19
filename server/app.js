@@ -55,6 +55,8 @@ const broadcastRoomState = (roomId) => {
             creatorId: room.creatorId,
             maxPlayers: room.maxPlayers || 4,           // NEW
             undercoverCount: room.undercoverCount || 1, // NEW
+            selectedCategory: room.selectedCategory || '全部', // NEW
+            showCategory: room.showCategory || false,   // NEW
             players: room.players.map(p => ({ id: p.id, nickname: p.nickname, isReady: p.isReady, isSpectator: p.isSpectator, avatarUrl: p.avatarUrl || '' })),
             gameState: room.gameState,
             currentPlayerId: (room.gamePlayerIds && typeof room.turnIndex === 'number') ? room.gamePlayerIds[room.turnIndex] : null,
@@ -223,6 +225,7 @@ wss.on('connection', (ws) => {
 
                 // Get selected category (default to '全部')
                 const selectedCategory = payload.selectedCategory || '全部';
+                const showCategory = payload.showCategory || false;
 
                 const roomId = generateRoomId();
                 rooms[roomId] = {
@@ -232,6 +235,7 @@ wss.on('connection', (ws) => {
                     maxPlayers: maxPlayers,           // NEW
                     undercoverCount: undercoverCount, // NEW
                     selectedCategory: selectedCategory, // NEW: Store selected category
+                    showCategory: showCategory,       // NEW: Store show category flag
                     players: [{ id: playerId, nickname: creatorNick, isReady: false, ws, isSpectator: false, avatarUrl: payload.avatarUrl || '' }],
                     gameState: 'waiting',
                 };

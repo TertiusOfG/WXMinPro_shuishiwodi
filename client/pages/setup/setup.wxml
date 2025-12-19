@@ -23,6 +23,11 @@
         <view class="picker-display category-picker-display">{{selectedCategory}}</view>
       </picker>
     </view>
+
+    <view class="config-item">
+      <text class="config-label">显示类别</text>
+      <switch checked="{{showCategory}}" bindchange="onShowCategoryChange" color="#F9A825"/>
+    </view>
     
     <!-- NEW: Hint text for valid range -->
     <view class="hint-text">

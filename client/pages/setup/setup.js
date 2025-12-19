@@ -16,7 +16,8 @@ Page({
         categories: [],               // Array of category objects from server
         categoryNames: ['全部'],      // Array of category names for picker
         categoryIndex: 0,             // Selected index in categoryNames
-        selectedCategory: '全部'      // Selected category name
+        selectedCategory: '全部',      // Selected category name
+        showCategory: false           // Whether to show category in game page
     },
 
     onLoad(options) {
@@ -192,6 +193,12 @@ Page({
         });
     },
 
+    onShowCategoryChange(e) {
+        this.setData({
+            showCategory: e.detail.value
+        });
+    },
+
     onNicknameInput(e) {
         const nickname = e.detail.value;
         this.setData({ nickname });
@@ -261,7 +268,8 @@ Page({
                 maxPlayers: maxPlayers,
                 undercoverCount: undercoverCount,
                 selectedCategory: this.data.selectedCategory,
-                avatarUrl: this.data.avatarUrl || ''
+                avatarUrl: this.data.avatarUrl || '',
+                showCategory: this.data.showCategory
             }
         };
 
