@@ -53,6 +53,18 @@
   font-size: 32rpx;
   background-color: #FAFAFA;
   color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Category picker - wider than default */
+.category-picker {
+  width: 200rpx;
+}
+
+.category-picker-display {
+  width: 200rpx;
 }
 
 /* Hint text for valid range */

@@ -19,8 +19,8 @@
 
     <view class="config-item">
       <text class="config-label">词汇类别</text>
-      <picker class="config-picker" mode="selector" range="{{categoryNames}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
-        <view class="picker-display">{{selectedCategory}}</view>
+      <picker class="config-picker category-picker" mode="selector" range="{{categoryNames}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+        <view class="picker-display category-picker-display">{{selectedCategory}}</view>
       </picker>
     </view>
     
