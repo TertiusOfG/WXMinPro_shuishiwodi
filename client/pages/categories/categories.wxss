@@ -1,7 +1,6 @@
 /* pages/categories/categories.wxss */
 .container {
   padding: 40rpx;
-  min-height: 100vh;
   background-color: #FAFAFA;
 }
 

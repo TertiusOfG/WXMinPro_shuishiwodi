@@ -22,7 +22,7 @@
       <input class="modal-input" type="text" placeholder="输入昵称" bindinput="onNicknameInput" value="{{nickname}}" />
     </view>
     
-    <input class="modal-input" placeholder="输入房间号" bindinput="onRoomIdInput" value="{{roomId}}" />
+    <input class="modal-input-room" placeholder="输入房间号" bindinput="onRoomIdInput" value="{{roomId}}" />
     
     <view class="checkbox-label">
       <checkbox value="true" checked="{{isSpectator}}" bindchange="onSpectatorChange" />

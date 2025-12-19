@@ -86,7 +86,7 @@
 }
 
 .avatar-button {
-  width: 88rpx;
+  width: 88rpx !important;
   height: 88rpx;
   padding: 0;
   margin: 0;
