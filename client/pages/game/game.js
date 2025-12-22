@@ -172,6 +172,11 @@ Page({
       return;
     }
 
+    if (msg.length > 200) {
+      wx.showToast({ title: '字数不能超过200字', icon: 'none' });
+      return;
+    }
+
     // Get avatar URL from storage
     const storedUserInfo = wx.getStorageSync('userInfo');
     const avatarUrl = storedUserInfo && storedUserInfo.avatarUrl ? storedUserInfo.avatarUrl : '';

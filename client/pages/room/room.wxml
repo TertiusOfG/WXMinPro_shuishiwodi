@@ -16,13 +16,12 @@
         <text class="status-text">{{item.isReady ? '已准备' : '未准备'}}</text>
       </view>
       <!-- NEW: Kick button (only visible to creator, not for self) -->
-      <button wx:if="{{isCreator && item.id !== myId}}" 
+      <view wx:if="{{isCreator && item.id !== myId}}" 
               class="kick-button" 
-              size="mini" 
               bindtap="kickPlayer" 
               data-player-id="{{item.id}}">
-        踢出
-      </button>
+        x
+      </view>
     </view>
   </view>
 
@@ -33,14 +32,12 @@
         <text>{{item.nickname}}</text>
       </view>
       <!-- NEW: Kick button for spectators -->
-      <button wx:if="{{isCreator}}" 
+      <view wx:if="{{isCreator}}" 
               class="kick-button" 
-              size="mini" 
               bindtap="kickPlayer" 
               data-player-id="{{item.id}}">
-        踢出
-      </button>
-    </view>
+        x
+      </view>
   </view>
 
   <block wx:if="{{!isSpectator}}">

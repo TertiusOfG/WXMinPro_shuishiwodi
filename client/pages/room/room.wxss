@@ -77,13 +77,22 @@
 }
 
 /* NEW: Kick button */
+/* NEW: Kick button */
 .kick-button {
+  width: 40rpx;
+  height: 40rpx;
   background-color: #FF5252;
   color: white;
-  border: none;
-  padding: 8rpx 20rpx;
-  border-radius: 8rpx;
+  border-radius: 50%;
   font-size: 24rpx;
+  /* Flexbox for centering 'x' */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Positioning/Spacing */
+  margin-left: 20rpx;
+  padding-bottom: 4rpx; /* Slight adjustment for visual center of 'x' */
+  box-shadow: 0 2rpx 4rpx rgba(0,0,0,0.2);
 }
 
 /* NEW: Spectator item */

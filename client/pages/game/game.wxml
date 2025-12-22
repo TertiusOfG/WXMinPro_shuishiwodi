@@ -46,7 +46,7 @@
   <view class="action-area" wx:if="{{!isSpectator}}">
     <!-- Speech Input -->
     <block wx:if="{{gameState === 'playing' && isMyTurn}}">
-      <input class="speech-input" type="text" placeholder="请输入你的描述" value="{{speechInput}}" bindinput="onSpeechInput" bindconfirm="submitSpeech" />
+      <input class="speech-input" type="text" placeholder="请输入你的描述" maxlength="200" value="{{speechInput}}" bindinput="onSpeechInput" bindconfirm="submitSpeech" />
       <button class="button" bindtap="submitSpeech">发言</button>
     </block>
 

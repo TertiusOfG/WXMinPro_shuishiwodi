@@ -84,12 +84,17 @@ Page({
         });
     },
 
-    // Toggle category expand/collapse
+    // Toggle category expand/collapse (accordion style - collapse others)
     toggleCategory(e) {
         const index = e.currentTarget.dataset.index;
-        const key = `categories[${index}].expanded`;
-        this.setData({
-            [key]: !this.data.categories[index].expanded
-        });
+        const currentExpanded = this.data.categories[index].expanded;
+
+        // Create updated categories array where only the clicked category is expanded
+        const categories = this.data.categories.map((cat, idx) => ({
+            ...cat,
+            expanded: idx === index ? !currentExpanded : false
+        }));
+
+        this.setData({ categories });
     }
 });
